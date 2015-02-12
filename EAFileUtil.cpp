@@ -52,6 +52,15 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #pragma warning(disable: 4127) // conditional expression is constant
 #endif
 
+#if defined(EA_PLATFORM_WINDOWS)
+    #include <windows.h>
+#elif defined(EA_PLATFORM_LINUX)
+    #include <sys/stat.h>
+    #include <sys/types.h>
+#else
+
+#endif
+
 
 namespace
 {
@@ -212,16 +221,16 @@ EAIO_API bool File::patternExists(const char16_t* pPathPattern)
 {
     using namespace Path;
 
-    // The EntryFindFirst function requires a valid directory path.
+    // The entryFindFirst function requires a valid directory path.
     // We must split pPathPattern into a directory and file component.
     const char16_t* const pFileNamePattern = Path::getFileName(pPathPattern);
     PathString16 directory16(pPathPattern, pFileNamePattern);
 
     EntryFindData entryFindData;
-    EntryFindData* const pEntryFindData = EntryFindFirst(directory16.c_str(), pFileNamePattern, &entryFindData);
+    EntryFindData* const pEntryFindData = entryFindFirst(directory16.c_str(), pFileNamePattern, &entryFindData);
 
     if(pEntryFindData)
-        EntryFindFinish(pEntryFindData);
+        entryFindFinish(pEntryFindData);
 
     return (pEntryFindData != NULL);
 }
@@ -956,10 +965,26 @@ namespace
     {
         // To consider: Perhaps this function should not worry about trailing separators -- 
         // it is currently called only from from create and create is taking care of them.
-            EA_FAIL_M("Unimplemented");
-            // Bug Paul Pedriana for this when you need it.
-            (void)pDirectory;
-            return false;
+
+#if defined(EA_PLATFORM_WINDOWS)
+        BOOL ret = CreateDirectoryW(pDirectory, NULL);
+        if(ret == 0)
+            return true;
+        //get more information about the failure?
+        return false;
+#elif defined(EA_PLATFORM_LINUX)
+        Path::PathString8 pathPattern8;
+        ConvertPathUTF16ToUTF8(pathPattern8, pDirectory);
+        int ret = mkdir(pathPattern8.c_str(),0777);
+        if(ret == 0)
+            return true;
+        return false;
+#else
+        EA_FAIL_M("Unimplemented");
+        // Bug Paul Pedriana for this when you need it.
+        (void)pDirectory;
+        return false;
+#endif
     }
 }
 
@@ -1047,7 +1072,7 @@ namespace
         size_t namePos = pathLen;
         bool   success = true;
         
-        if (di.Read(pDirectory, entryList, 0, kDirectoryEntryFile | kDirectoryEntryDirectory))
+        if (di.read(pDirectory, entryList, 0, kDirectoryEntryFile | kDirectoryEntryDirectory))
         {
             // Make sure the directory ends in a path separator. Note: If we have a
             // relative drive specification (c:), we don't want to add a backslash to it!
@@ -1180,7 +1205,7 @@ EAIO_API bool Directory::copy(const char16_t* pDirectorySource, const char16_t* 
             DirectoryIterator            directoryIterator;
             DirectoryIterator::EntryList entryList(DirectoryIterator::EntryList::allocator_type(EASTL_NAME_VAL(EAIO_ALLOC_PREFIX "EAFileNotification/FSEntry")));
 
-            directoryIterator.Read(source16.c_str(), entryList, NULL, bRecursive ? kDirectoryEntryDirectory | kDirectoryEntryFile : kDirectoryEntryFile);
+            directoryIterator.read(source16.c_str(), entryList, NULL, bRecursive ? kDirectoryEntryDirectory | kDirectoryEntryFile : kDirectoryEntryFile);
 
             for(DirectoryIterator::EntryList::iterator it(entryList.begin()); it != entryList.end(); ++it)
             {
@@ -1238,7 +1263,7 @@ EAIO_API bool Directory::setAttributes(const char16_t* pBaseDirectory, int nAttr
         DirectoryIterator            directoryIterator;
         DirectoryIterator::EntryList entryList(DirectoryIterator::EntryList::allocator_type(EASTL_NAME_VAL(EAIO_ALLOC_PREFIX "EAFileNotification/FSEntry")));
 
-        bResult = (directoryIterator.Read(base16.c_str(), entryList, NULL, bRecursive ? kDirectoryEntryDirectory | kDirectoryEntryFile : kDirectoryEntryFile) != 0);
+        bResult = (directoryIterator.read(base16.c_str(), entryList, NULL, bRecursive ? kDirectoryEntryDirectory | kDirectoryEntryFile : kDirectoryEntryFile) != 0);
 
         if(bResult)
         {
@@ -1383,9 +1408,9 @@ EAIO_API bool isDirectoryEmpty(const char16_t* pDirectory, int nDirectoryEntryFl
     EA::IO::DirectoryIterator it;
 
     if(bRecursive)
-        return it.ReadRecursive(pDirectory, entryList, NULL, nDirectoryEntryFlags, true, true, 1) == 0;
+        return it.readRecursive(pDirectory, entryList, NULL, nDirectoryEntryFlags, true, true, 1) == 0;
 
-    return it.Read(pDirectory, entryList, NULL, nDirectoryEntryFlags, 1) == 0;
+    return it.read(pDirectory, entryList, NULL, nDirectoryEntryFlags, 1) == 0;
 }
 
 EAIO_API bool isDirectoryEmpty(const char8_t*  pDirectory, int nDirectoryEntryFlags, bool bRecursive)
@@ -1783,17 +1808,4 @@ bool isFilePathStringValid(const char16_t* pPath, FileSystem fileSystemType)
 
 
 } // namespace EA
-
-
-
-
-
-
-
-
-
-
-
-
-
 

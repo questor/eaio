@@ -155,9 +155,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED
 //
 // Defined as 0 or 1. Default is 1 (for backward compatibility).
-// Enables the implementation of ICoreAllocator::GetDefaultAllocator
+// Enables the implementation of ICoreAllocator::getDefaultAllocator
 // in DLL builds. If you build EAIO as a standalone DLL then you typically
-// need provide a local implementation of the ICoreAllocator::GetDefaultAllocator 
+// need provide a local implementation of the ICoreAllocator::getDefaultAllocator 
 // function. However, some user usage patterns are such that they would prefer
 // to disable this implementation, because they link in a way that it causes 
 // problems.
@@ -171,13 +171,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // EAIO_DEFAULT_ALLOCATOR_ENABLED
 //
 // Defined as 0 or 1. Default is 1 (for backward compatibility).
-// Enables the use of ICoreAllocator::GetDefaultAllocator.
+// Enables the use of ICoreAllocator::getDefaultAllocator.
 // If disabled then the user is required to explicitly specify the 
 // allocator used by EAIO with EA::IO::setAllocator() or on a class by
 // class basis within EAIO. Note that this option is different from the 
 // EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED option. This option enables the 
-// calling of GetDefaultAllocator by this package, the former enables the 
-// actual implementation of GetDefaultAllocator within this package.
+// calling of getDefaultAllocator by this package, the former enables the 
+// actual implementation of getDefaultAllocator within this package.
 //
 #ifndef EAIO_DEFAULT_ALLOCATOR_ENABLED
     #define EAIO_DEFAULT_ALLOCATOR_ENABLED 1

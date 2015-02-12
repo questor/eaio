@@ -59,7 +59,7 @@ EA::IO::SharedPointer::SharedPointer(void* pData, bool bFreeData, Allocator* pAl
 
 EA::IO::SharedPointer::SharedPointer(size_type nSize, const char* pName)
     : mpAllocator(IO::getAllocator())
-    , mpData((uint8_t*)mpAllocator->Alloc((size_t)nSize, pName ? pName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0))
+    , mpData((uint8_t*)mpAllocator->alloc((size_t)nSize, pName ? pName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0))
     , mnRefCount(0)
     , mbFreeData(true)
 {
@@ -69,7 +69,7 @@ EA::IO::SharedPointer::SharedPointer(size_type nSize, const char* pName)
 
 EA::IO::SharedPointer::SharedPointer(size_type nSize, Allocator* pAllocator, const char* pName)
     : mpAllocator(pAllocator ? pAllocator :IO::getAllocator())
-    , mpData((uint8_t*)mpAllocator->Alloc((size_t)nSize, pName ? pName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0))
+    , mpData((uint8_t*)mpAllocator->alloc((size_t)nSize, pName ? pName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0))
     , mnRefCount(0)
     , mbFreeData(true)
 {
@@ -82,7 +82,7 @@ int EA::IO::SharedPointer::Release()
     if(mnRefCount > 1)
         return --mnRefCount;
     if(mbFreeData)
-        mpAllocator->Free(mpData);
+        mpAllocator->free(mpData);
     delete this;
     return 0;
 }
@@ -226,7 +226,7 @@ bool EA::IO::MemoryStream::SetData(void* pData, size_type nSize, bool bUsePointe
             pAllocator = mpAllocator ? mpAllocator : IO::getAllocator();
 
         EA_ASSERT(pAllocator);
-        void* const pDatacopy = (bUsePointer ? pData : pAllocator->Alloc((size_t)nSize, mpName ? mpName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0));
+        void* const pDatacopy = (bUsePointer ? pData : pAllocator->alloc((size_t)nSize, mpName ? mpName : EAIO_ALLOC_PREFIX "EAStreamMemory/data", 0));
 
         if(pDatacopy)
         {
@@ -245,7 +245,7 @@ bool EA::IO::MemoryStream::SetData(void* pData, size_type nSize, bool bUsePointe
                 bReturnValue = true;
             }
             else if(!bUsePointer) // Avoid leaking memory in the failure case
-                pAllocator->Free(pDatacopy);
+                pAllocator->free(pDatacopy);
         }
     }
     else

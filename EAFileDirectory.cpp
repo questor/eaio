@@ -66,7 +66,7 @@ namespace Internal
     template<class T>
     T* Allocate(EA::Allocator::ICoreAllocator* pAllocator, const char* pName)
     {
-        T* const pT = (T*)pAllocator->Alloc(sizeof(T), pName, 0, 0);
+        T* const pT = (T*)pAllocator->alloc(sizeof(T), pName, 0, 0);
         if(pT)
             new(pT) T;
         return pT;
@@ -78,7 +78,7 @@ namespace Internal
         if(pT)
         {
             pT->~T();
-            pAllocator->Free(pT);
+            pAllocator->free(pT);
         }
     }
 }
@@ -88,7 +88,7 @@ namespace Internal
 ///////////////////////////////////////////////////////////////////////////////
 // Read
 //
-size_t DirectoryIterator::Read(const char16_t* pDirectory, EntryList& entryList, 
+size_t DirectoryIterator::read(const char16_t* pDirectory, EntryList& entryList, 
                              const char16_t* pFilterPattern, int nDirectoryEntryFlags, 
                              size_t maxResultCount)
 {
@@ -101,7 +101,7 @@ size_t DirectoryIterator::Read(const char16_t* pDirectory, EntryList& entryList,
     #endif
 
     // Iterate entries.
-    for(pEntryFindData = EntryFindFirst(pDirectory, pFilterPattern, &entryFindData); pEntryFindData && (resultCount < maxResultCount); )
+    for(pEntryFindData = entryFindFirst(pDirectory, pFilterPattern, &entryFindData); pEntryFindData && (resultCount < maxResultCount); )
     {
         if(!StrEq16(pEntryFindData->mName, EA_DIRECTORY_CURRENT_16) && // If it is neither "./" nor "../"
            !StrEq16(pEntryFindData->mName, EA_DIRECTORY_PARENT_16))
@@ -128,9 +128,9 @@ size_t DirectoryIterator::Read(const char16_t* pDirectory, EntryList& entryList,
             }
         }
 
-        if(!EntryFindNext(pEntryFindData))
+        if(!entryFindNext(pEntryFindData))
         {
-            EntryFindFinish(pEntryFindData);
+            entryFindFinish(pEntryFindData);
             break;
         }
     }
@@ -161,9 +161,9 @@ size_t DirectoryIterator::Read(const char16_t* pDirectory, EntryList& entryList,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// ReadRecursive
+// readRecursive
 //
-size_t DirectoryIterator::ReadRecursive(const char16_t* pBaseDirectory, EntryList& entryList, 
+size_t DirectoryIterator::readRecursive(const char16_t* pBaseDirectory, EntryList& entryList, 
                                       const char16_t* pFilterPattern, int nEntryTypeFlags, 
                                       bool bIncludeBaseDirectoryInSearch, bool bFullPaths, 
                                       size_t maxResultCount)
@@ -190,7 +190,7 @@ size_t DirectoryIterator::ReadRecursive(const char16_t* pBaseDirectory, EntryLis
        (mnListSize < maxResultCount))
     {
         // Add all files in the current directory into the list, using the filter pattern.
-        const size_t additionCount = Read(pBaseDirectory, entryList, pFilterPattern, kDirectoryEntryFile, maxResultCount - mnListSize);
+        const size_t additionCount = read(pBaseDirectory, entryList, pFilterPattern, kDirectoryEntryFile, maxResultCount - mnListSize);
 
         EntryList::iterator it(entryList.end());
         eastl::advance(it, -(int32_t)(uint32_t)additionCount);
@@ -221,7 +221,7 @@ size_t DirectoryIterator::ReadRecursive(const char16_t* pBaseDirectory, EntryLis
         EntryList entryListTemp(entryList.getAllocator());
 
         // Add all directories in the current directory into the list, ignoring the filter pattern.
-        Read(pBaseDirectory, entryListTemp, NULL, kDirectoryEntryDirectory, kMaxEntryCountDefault);
+        read(pBaseDirectory, entryListTemp, NULL, kDirectoryEntryDirectory, kMaxEntryCountDefault);
 
         for(EntryList::iterator it = entryListTemp.begin(); (it != entryListTemp.end()) && (mnListSize < maxResultCount); ++it)
         {
@@ -249,7 +249,7 @@ size_t DirectoryIterator::ReadRecursive(const char16_t* pBaseDirectory, EntryLis
             }
 
             // Now recursively read the subdirectory.
-            ReadRecursive(pathTemp.c_str(), entryList, pFilterPattern, nEntryTypeFlags, true, bFullPaths, maxResultCount);
+            readRecursive(pathTemp.c_str(), entryList, pFilterPattern, nEntryTypeFlags, true, bFullPaths, maxResultCount);
         }
     }
 
@@ -263,30 +263,30 @@ size_t DirectoryIterator::ReadRecursive(const char16_t* pBaseDirectory, EntryLis
 
 
 ////////////////////////////////////////////////////////////////////////////
-// EntryFindFirst
+// entryFindFirst
 ////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
-// EntryFindFirst / EntryFindNext / EntryFindFinish
+// entryFindFirst / entryFindNext / entryFindFinish
 //
 
     // If it doesn't have anything built-in; you need to implement 
     // your own enumeration mechanism, such as by putting a file in each 
     // directory listing the directory's contents.
 
-    EAIO_API EntryFindData* EntryFindFirst(const char16_t* /*pDirectoryPath*/, const char16_t* /*pFilterPattern*/, EntryFindData* /*pEntryFindData*/)
+    EAIO_API EntryFindData* entryFindFirst(const char16_t* /*pDirectoryPath*/, const char16_t* /*pFilterPattern*/, EntryFindData* /*pEntryFindData*/)
     {
         // To do.
         return NULL;
     }
 
-    EAIO_API EntryFindData* EntryFindNext(EntryFindData* /*pEntryFindData*/)
+    EAIO_API EntryFindData* entryFindNext(EntryFindData* /*pEntryFindData*/)
     {
         // To do.
         return false;
     }
 
-    EAIO_API void EntryFindFinish(EntryFindData* /*pEntryFindData*/)
+    EAIO_API void entryFindFinish(EntryFindData* /*pEntryFindData*/)
     {
         // To do.
     }

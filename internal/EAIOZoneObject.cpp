@@ -92,7 +92,7 @@ namespace EA
 
             static const size_t kAlignOfT = EA_ALIGN_OF(EAIOZoneObject);
 
-            void* const p = pAllocator->Alloc(n + kOffset, pName, flags, kAlignOfT, kOffset);
+            void* const p = pAllocator->alloc(n + kOffset, pName, flags, kAlignOfT, kOffset);
 
             if(p)
             {
@@ -175,7 +175,7 @@ namespace EA
                 //#endif
 
                 // Free the entire block (including space allocated for the ICoreAllocator*)
-                pStashedAllocator->Free(pAllocatedBlockStart);
+                pStashedAllocator->free(pAllocatedBlockStart);
             }
         }
 

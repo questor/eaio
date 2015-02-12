@@ -81,7 +81,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     // on the MemoryMan package.
     #ifndef EA_CA_NEW
         #define EA_CA_NEW(Class, pAllocator, pName) \
-            new ((pAllocator)->Alloc(sizeof(Class), pName, 0, EA_ALIGN_OF(Class), 0)) Class
+            new ((pAllocator)->alloc(sizeof(Class), pName, 0, EA_ALIGN_OF(Class), 0)) Class
     #endif
     #ifndef EA_CA_DELETE
         #define EA_CA_DELETE(pObject, pAllocator) EA::IO::delete_object(pObject, pAllocator)
@@ -104,7 +104,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 if(pObject) // As per the C++ standard, deletion of NULL results in a no-op.
                 {
                     pObject->~T();
-                    pAllocator->Free(pObject);
+                    pAllocator->free(pObject);
                 }
             }
         }

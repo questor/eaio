@@ -48,13 +48,13 @@ namespace EA
 		class CoreAllocatorMalloc : public EA::Allocator::ICoreAllocator
 		{
 		public:
-			void* Alloc(size_t size, const char* /*name*/, unsigned int /*flags*/)
+			void* alloc(size_t size, const char* /*name*/, unsigned int /*flags*/)
 				{ return new char[size]; }
 
-			void* Alloc(size_t size, const char* /*name*/, unsigned int /*flags*/, unsigned int /*align*/, unsigned int /*alignOffset*/ = 0)
+			void* alloc(size_t size, const char* /*name*/, unsigned int /*flags*/, unsigned int /*align*/, unsigned int /*alignOffset*/ = 0)
 				{ return new char[size]; }
 
-			void  Free(void* p, size_t /*size*/ = 0)
+			void  free(void* p, size_t /*size*/ = 0)
 				{ delete[] (char*)p; }
 		};
 
@@ -65,7 +65,7 @@ namespace EA
     #if EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED
 	    namespace Allocator
 	    {
-            ICoreAllocator* ICoreAllocator::GetDefaultAllocator()
+            ICoreAllocator* ICoreAllocator::getDefaultAllocator()
             {
                 return &IO::gCoreAllocatorMalloc;
             }

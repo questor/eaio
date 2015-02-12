@@ -126,11 +126,11 @@ namespace EA
             /// a directory path name that ends in a path separator. This is by design as it simplifies
             /// the specification of and manipulation of paths.
             ///
-            size_t Read(const char16_t* pDirectory, EntryList& entryList, const char16_t* pFilterPattern = NULL, 
+            size_t read(const char16_t* pDirectory, EntryList& entryList, const char16_t* pFilterPattern = NULL, 
                         int nDirectoryEntryFlags = kDirectoryEntryFile, size_t maxResultCount = kMaxEntryCountDefault);
 
 
-            /// ReadRecursive
+            /// readRecursive
             ///
             /// Yields a list of all paths that match the input criteria.
             /// Returns the number of items added to the list.
@@ -158,18 +158,18 @@ namespace EA
             ///     DirectoryIterator di;
             ///     DirectoryIterator::EntryList entryList;
             ///
-            ///     const bool fileWasFound = (di.ReadRecursive("/UserData/", entryList, L"CustomMusic.mp3", kDirectoryEntryFile, true, true, 1) == 1);
+            ///     const bool fileWasFound = (di.readRecursive("/UserData/", entryList, L"CustomMusic.mp3", kDirectoryEntryFile, true, true, 1) == 1);
             ///     if(fileWasFound)
             ///         printf("File found: %ls.\n", entryList.front().c_str());
             ///
-            size_t ReadRecursive(const char16_t* pBaseDirectory, EntryList& entryList, const char16_t* pFilterPattern = NULL, 
+            size_t readRecursive(const char16_t* pBaseDirectory, EntryList& entryList, const char16_t* pFilterPattern = NULL, 
                                  int nDirectoryEntryFlags = kDirectoryEntryFile, bool bIncludeBaseDirectoryInSearch = true, 
                                  bool bFullPaths = true, size_t maxResultCount = kMaxEntryCountDefault);
 
         protected:
             size_t          mnListSize;             /// Size of list. Used to compare to maxResultCount. Can't use list::size at runtime due to performance reasons and because the user list may be non-empty.
-            int             mnRecursionIndex;       /// The ReadRecursive recursion level. Used by recursive member functions.
-            const char16_t* mpBaseDirectory;        /// Saved copy of pBaseDirectory for first ReadRecursive call. Used by recursive member functions.
+            int             mnRecursionIndex;       /// The readRecursive recursion level. Used by recursive member functions.
+            const char16_t* mpBaseDirectory;        /// Saved copy of pBaseDirectory for first readRecursive call. Used by recursive member functions.
             eastl_size_t    mBaseDirectoryLength;   /// Strlen of mpBaseDirectory.
 
         }; // class DirectoryIterator
@@ -197,9 +197,9 @@ namespace EA
         {
             char16_t  mName[kMaxPathLength];                    /// The individual resulting file or directory entry name itself. Not a full path.
             bool      mbIsDirectory;                            /// True if the found file is a directory and not a file.
-            bool      mbIsAllocated;                            /// True if this EntryFindData struct was allocated by EntryFindFirst.
-            char16_t  mDirectoryPath[kMaxPathLength];           /// The directory specified in EntryFindFirst.
-            char16_t  mEntryFilterPattern[kMaxPathLength];      /// The filter pattern specified in EntryFindFirst.
+            bool      mbIsAllocated;                            /// True if this EntryFindData struct was allocated by entryFindFirst.
+            char16_t  mDirectoryPath[kMaxPathLength];           /// The directory specified in entryFindFirst.
+            char16_t  mEntryFilterPattern[kMaxPathLength];      /// The filter pattern specified in entryFindFirst.
             uintptr_t mPlatformHandle;                          /// Platform or implementation-specific handle, if needed.
             char      mPlatformData[kEntryFindDataSize];        /// Platform or implementation-specific data.
 
@@ -209,10 +209,10 @@ namespace EA
         } EA_POSTFIX_ALIGN(8);
 
 
-        /// EntryFindFirst
+        /// entryFindFirst
         ///
         /// This function returns an internally allocated EntryFindData* or returns NULL. 
-        /// You must call EntryFindFinish to free the EntryFindData*; do not attempt to 
+        /// You must call entryFindFinish to free the EntryFindData*; do not attempt to 
         /// delete the pointer yourself. This function allocates memory from the global
         /// heap; the amount of memory allocated is relative to the number of matching 
         /// entries in the given directory.
@@ -228,33 +228,33 @@ namespace EA
         /// Example usage:
         ///    EntryFindData efd;
         ///    
-        ///    if(EntryFindFirst(L"/somedir/", L"*.html", &efd)) {
+        ///    if(entryFindFirst(L"/somedir/", L"*.html", &efd)) {
         ///        do {
         ///            Printf8("%ls\n", efd.mName);
-        ///        } while(EntryFindNext(&efd));
+        ///        } while(entryFindNext(&efd));
         ///    
-        ///        EntryFindFinish(&efd);
+        ///        entryFindFinish(&efd);
         ///    }
         ///    
-        EAIO_API EntryFindData* EntryFindFirst(const char16_t* pDirectory, const char16_t* pFilterPattern = NULL, 
+        EAIO_API EntryFindData* entryFindFirst(const char16_t* pDirectory, const char16_t* pFilterPattern = NULL, 
                                                 EntryFindData* pEntryFindData = NULL);
 
 
-        /// EntryFindNext
+        /// entryFindNext
         ///
-        /// Input is the 'EntryFindData*' returned from EntryFindFirst. 
-        /// You must call EntryFindFinish to free the EntryFindData*; 
+        /// Input is the 'EntryFindData*' returned from entryFindFirst. 
+        /// You must call entryFindFinish to free the EntryFindData*; 
         /// do not attempt to delete the pointer yourself.
         ///
-        EAIO_API EntryFindData* EntryFindNext(EntryFindData* pData);
+        EAIO_API EntryFindData* entryFindNext(EntryFindData* pData);
 
 
-        /// EntryFindFinish
+        /// entryFindFinish
         ///
-        /// Input is the 'EntryFindData*' returned from EntryFindFirst. 
+        /// Input is the 'EntryFindData*' returned from entryFindFirst. 
         /// This is the only safe way to free a EntryFindData*.
         ///
-        EAIO_API void EntryFindFinish(EntryFindData* pData);
+        EAIO_API void entryFindFinish(EntryFindData* pData);
 
 
     } // namespace IO

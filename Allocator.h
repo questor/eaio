@@ -47,7 +47,7 @@ namespace EA
         /// getAllocator
         /// 
         /// Gets the default EAIO ICoreAllocator set by the setAllocator function.
-        /// If setAllocator is not called, the ICoreAllocator::GetDefaultAllocator 
+        /// If setAllocator is not called, the ICoreAllocator::getDefaultAllocator 
         /// allocator is returned.
         ///
         EAIO_API Allocator::ICoreAllocator* getAllocator();

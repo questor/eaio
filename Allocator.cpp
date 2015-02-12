@@ -51,7 +51,7 @@ EAIO_API Allocator::ICoreAllocator* getAllocator()
 {
     #if EAIO_DEFAULT_ALLOCATOR_ENABLED
         if(!gpCoreAllocator)
-            gpCoreAllocator = EA::Allocator::ICoreAllocator::GetDefaultAllocator();
+            gpCoreAllocator = EA::Allocator::ICoreAllocator::getDefaultAllocator();
     #endif
 
     return gpCoreAllocator;

@@ -432,9 +432,9 @@ IniFile::IniFile(const char16_t* pPath, int optionFlags, EA::Allocator::ICoreAll
     mbreadEntryCacheReady(false),
     mFileBusyWaitMs(0),
     mSectionPositionMap(Allocator::EAIOEASTLCoreAllocator(EAIO_ALLOC_PREFIX "EAIniFile", 
-                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::GetDefaultAllocator())),
+                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::getDefaultAllocator())),
     mSectionNameMap(Allocator::EAIOEASTLCoreAllocator(EAIO_ALLOC_PREFIX "EAIniFile", 
-                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::GetDefaultAllocator()))
+                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::getDefaultAllocator()))
 {
     mPath[0] = 0;
     setPath(pPath);
@@ -453,9 +453,9 @@ IniFile::IniFile(EA::IO::IStream* pStream, EA::Allocator::ICoreAllocator* pCoreA
     mbreadEntryCacheReady(false),
     mFileBusyWaitMs(0),
     mSectionPositionMap(Allocator::EAIOEASTLCoreAllocator(EAIO_ALLOC_PREFIX "EAIniFile", 
-                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::GetDefaultAllocator())),
+                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::getDefaultAllocator())),
     mSectionNameMap(Allocator::EAIOEASTLCoreAllocator(EAIO_ALLOC_PREFIX "EAIniFile", 
-                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::GetDefaultAllocator()))
+                        pCoreAllocator ? pCoreAllocator : EA::Allocator::ICoreAllocator::getDefaultAllocator()))
 {
     mPath[0] = 0;
     mpStream = pStream;

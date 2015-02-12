@@ -471,7 +471,7 @@ void FileChangeNotification::GetChildFileEntrySet(FSEntry* pFSEntryBase, FSEntry
 
     GetEntryPath(pFSEntryBase, pPath);
 
-    if(directoryIterator.Read(pPath, entryList, NULL, kDirectoryEntryFile))
+    if(directoryIterator.read(pPath, entryList, NULL, kDirectoryEntryFile))
     {
         for(DirectoryIterator::EntryList::iterator it = entryList.begin(); it != entryList.end(); ++it)
         {
@@ -592,7 +592,7 @@ void FileChangeNotification::BuildEntry(FSEntry* pFSEntryBase, const char16_t* p
         DirectoryIterator::EntryList entryList(DirectoryIterator::EntryList::allocator_type(EASTL_NAME_VAL(EAIO_ALLOC_PREFIX "EAFileNotification/FSEntry"), mpCoreAllocator));
         const int                    nEntryFlags = (mnOptionFlags & kOptionFlagWatchSubdirectories) ? kDirectoryEntryDirectory | kDirectoryEntryFile : kDirectoryEntryFile;
 
-        if(directoryIterator.Read(pPath, entryList, NULL, nEntryFlags))
+        if(directoryIterator.read(pPath, entryList, NULL, nEntryFlags))
         {
             for(DirectoryIterator::EntryList::iterator it = entryList.begin(); it != entryList.end(); ++it)
             {
