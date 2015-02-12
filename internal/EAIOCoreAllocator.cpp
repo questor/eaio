@@ -1,5 +1,5 @@
 /*
-copyright (C) 2007,2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,58 +26,56 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/////////////////////////////////////////////////////////////////////////////
-// Allocator.h
-// created by Paul Pedriana - 2007
-/////////////////////////////////////////////////////////////////////////////
-
-
-#ifndef EAIO_ALLOCATOR_H
-#define EAIO_ALLOCATOR_H
+///////////////////////////////////////////////////////////////////////////////
+// EAIOCoreAllocator.cpp
+//
+// copyright (c) 2006 Electronic Arts Inc.
+// Written and maintained by Paul Pedriana.
+///////////////////////////////////////////////////////////////////////////////
 
 
 #include <eaio/internal/Config.h>
 #include <eastl/coreallocator/icoreallocator_interface.h>
 
 
+#if EAIO_DLL // If this library is built to be a DLL... provide our own default new/delete-based ICoreAllocator.
+
+
 namespace EA
 {
-    namespace IO
-    {
-        /// getAllocator
-        /// 
-        /// Gets the default EAIO ICoreAllocator set by the setAllocator function.
-        /// If setAllocator is not called, the ICoreAllocator::GetDefaultAllocator 
-        /// allocator is returned.
-        ///
-        EAIO_API Allocator::ICoreAllocator* getAllocator();
+	namespace IO
+	{
+		class CoreAllocatorMalloc : public EA::Allocator::ICoreAllocator
+		{
+		public:
+			void* Alloc(size_t size, const char* /*name*/, unsigned int /*flags*/)
+				{ return new char[size]; }
+
+			void* Alloc(size_t size, const char* /*name*/, unsigned int /*flags*/, unsigned int /*align*/, unsigned int /*alignOffset*/ = 0)
+				{ return new char[size]; }
+
+			void  Free(void* p, size_t /*size*/ = 0)
+				{ delete[] (char*)p; }
+		};
+
+		CoreAllocatorMalloc gCoreAllocatorMalloc;
+	}
 
 
-        /// setAllocator
-        /// 
-        /// This function lets the user specify the default memory allocator this library will use.
-        /// For the most part, this library avoids memory allocations. But there are times 
-        /// when allocations are required, especially during startup. Currently the Font Fusion
-        /// library which sits under EAIO requires the use of a globally set allocator.
-        ///
-        EAIO_API void setAllocator(Allocator::ICoreAllocator* pCoreAllocator);
+    #if EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED
+	    namespace Allocator
+	    {
+            ICoreAllocator* ICoreAllocator::GetDefaultAllocator()
+            {
+                return &IO::gCoreAllocatorMalloc;
+            }
+	    }
+    #endif
 
-    }
-
-}
-
-#endif // Header include guard
-
-
-
-
-
-
-
-
+} // namespace EA
 
 
 
-
+#endif // EAIO_DLL
 
 

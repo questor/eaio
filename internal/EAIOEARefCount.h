@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,7 +29,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 // EARefCount.h
 //
-// Copyright (c) 2007, Electronic Arts Inc. All rights reserved.
+// copyright (c) 2007, Electronic Arts Inc. All rights reserved.
 // Written by Paul Pedriana.
 //
 // Implements basic reference counting functionality.
@@ -45,7 +45,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /// namespace EA
 /// The standard Electronic Arts namespace
-namespace eaio
+namespace EA
 {
     template <typename T>
     class EAIOAutoRefCount

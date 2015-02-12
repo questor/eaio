@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,33 +29,26 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /////////////////////////////////////////////////////////////////////////////
 // EAFileStreamWin32.cpp
 //
-// Copyright (c) 2003, Electronic Arts Inc. All rights reserved.
-// Created by Paul Pedriana
+// copyright (c) 2003, Electronic Arts Inc. All rights reserved.
+// created by Paul Pedriana
 //
 // Provides a file stream for Microsoft-derived platforms. These include
-// Win32, Win64, XBox, and XBox2.
+// Win32, Win64, XBox, WinCE.
 //
 /////////////////////////////////////////////////////////////////////////////
 
 
-#include "EAIO/internal/Config.h"
-#include "eastl/extra/debug.h"
+#include <eaio/internal/Config.h>
+#include EA_ASSERT_HEADER
 #ifndef EAIO_EAFILESTREAM_H
-    #include <EAIO/FileStream.h>
-#endif
-#if defined(TARGET_PLATFORM_XBOX) || defined(TARGET_PLATFORM_XENON)
-    #pragma warning(push, 1)
-    #include <comdecl.h>
-    #pragma warning(pop)
-#elif defined(TARGET_PLATFORM_WINDOWS)
-    #ifndef WIN32_LEAN_AND_MEAN
-        #define WIN32_LEAN_AND_MEAN
-    #endif
-    #include <windows.h>
+    #include <eaio/EAFileStream.h>
 #endif
 
 
-namespace eaio
+namespace EA
+{
+
+namespace IO
 {
 
 namespace FileStreamLocal
@@ -135,13 +128,13 @@ FileStream& FileStream::operator=(const FileStream& fs)
 }
 
 
-int FileStream::addRef()
+int FileStream::AddRef()
 {
     return ++mnRefCount;
 }
 
 
-int FileStream::release()
+int FileStream::Release()
 {
     if(mnRefCount > 1)
         return --mnRefCount;
@@ -198,14 +191,14 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
 
     if((mhFile == kFileHandleInvalid) && nAccessFlags) // If not already open and if some kind of access is requested...
     {
-        DWORD nAccess(0), nShare(0), nCreate(0), dwFlagsAndAttributes(0);
+        DWORD nAccess(0), nShare(0), ncreate(0), dwFlagsAndAttributes(0);
 
         if(nAccessFlags & kAccessFlagRead)
             nAccess |= GENERIC_READ;
         if(nAccessFlags & kAccessFlagWrite)
             nAccess |= GENERIC_WRITE;
 
-        if(nSharing & kShareread)
+        if(nSharing & kShareRead)
             nShare |= FILE_SHARE_READ;
         if(nSharing & kShareWrite)
             nShare |= (FILE_SHARE_READ | FILE_SHARE_WRITE);
@@ -213,32 +206,32 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
         if(nCreationDisposition == kCDDefault)
         {
             // To consider: A proposal is on the table that specifies that the 
-            // default disposition for write is kCDCreateAlways and the default
-            // disposition for read/write is kCDOpenAlways. However, such a change
+            // default disposition for write is kCDcreateAlways and the default
+            // disposition for read/write is kCDopenAlways. However, such a change
             // may break existing code.
             if(nAccessFlags & kAccessFlagWrite)
-                nCreationDisposition = kCDOpenAlways;
+                nCreationDisposition = kCDopenAlways;
             else
-                nCreationDisposition = kCDOpenExisting;
+                nCreationDisposition = kCDopenExisting;
         }
 
         switch(nCreationDisposition)
         {
             default:
-            case kCDOpenExisting:
-                nCreate = OPEN_EXISTING;
+            case kCDopenExisting:
+                ncreate = OPEN_EXISTING;
                 break;
-            case kCDCreateNew:
-                nCreate = CREATE_NEW;
+            case kCDcreateNew:
+                ncreate = CREATE_NEW;
                 break;
-            case kCDCreateAlways:
-                nCreate = CREATE_ALWAYS;
+            case kCDcreateAlways:
+                ncreate = CREATE_ALWAYS;
                 break;
-            case kCDOpenAlways:
-                nCreate = OPEN_ALWAYS;
+            case kCDopenAlways:
+                ncreate = OPEN_ALWAYS;
                 break;
             case kCDTruncateExisting:
-                nCreate = TRUNCATE_EXISTING;
+                ncreate = TRUNCATE_EXISTING;
                 break;
         }
 
@@ -247,14 +240,7 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
         else if(nUsageHints & kUsageHintRandom)
             dwFlagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
 
-        #if defined(TARGET_PLATFORM_XBOX) || defined(TARGET_PLATFORM_XENON)
-            // There aren't any W file APIs for XBox and Xenon (XBox 360)
-            char pPath8[_MAX_PATH];
-            WideCharToMultiByte(CP_UTF8, 0, mpPath16, -1, pPath8, _MAX_PATH, 0, 0);
-            mhFile = CreateFile(pPath8, nAccess, nShare, NULL, nCreate, dwFlagsAndAttributes, NULL);
-        #else
-            mhFile = CreateFileW(mpPath16, nAccess, nShare, NULL, nCreate, dwFlagsAndAttributes, NULL);
-        #endif
+            mhFile = createFileW(mpPath16, nAccess, nShare, NULL, ncreate, dwFlagsAndAttributes, NULL);
 
         if(mhFile == INVALID_HANDLE_VALUE) // If it failed...
         {
@@ -284,7 +270,7 @@ bool FileStream::close()
 
     if(mhFile != kFileHandleInvalid)
     {
-        CloseHandle(mhFile); // This returns zero upon error. But there's not much to do about it.
+        closeHandle(mhFile); // This returns zero upon error. But there's not much to do about it.
 
         mhFile        = kFileHandleInvalid;
         mnAccessFlags = 0;
@@ -298,18 +284,18 @@ bool FileStream::close()
 }
 
 
-int FileStream::getAccessFlags() const
+int FileStream::GetAccessFlags() const
 {
     return mnAccessFlags;
 }
 
 
-int FileStream::getState() const
+int FileStream::GetState() const
 {
     using namespace FileStreamLocal;
 
     if(mhFile == kFileHandleInvalid)
-        return kStateNotOpen;
+        return kStateNotopen;
 
     return mnLastError;
 }
@@ -348,13 +334,13 @@ size_type FileStream::getSize() const
 }
 
 
-bool FileStream::setSize(size_type size)
+bool FileStream::SetSize(size_type size)
 {
     using namespace FileStreamLocal;
 
     if(mhFile != kFileHandleInvalid)
     {
-        const off_type savedPosition = getPosition();
+        const off_type savedPosition = GetPosition();
 
         // Under Win32, you set the length of a file by calling SetFilePointer
         // to set the pointer to the given position, then SetEndOfFile (or Write)
@@ -366,12 +352,12 @@ bool FileStream::setSize(size_type size)
         {
             if(SetEndOfFile(mhFile))
             {
-                setPosition(savedPosition);
+                SetPosition(savedPosition);
                 return true;
             }
         }
 
-        setPosition(savedPosition);
+        SetPosition(savedPosition);
         mnLastError = GetLastError();
     }
 
@@ -379,7 +365,7 @@ bool FileStream::setSize(size_type size)
 }
 
 
-off_type FileStream::getPosition(PositionType positionType) const
+off_type FileStream::GetPosition(PositionType positionType) const
 {
     LARGE_INTEGER li; li.QuadPart = 0;
     const BOOL bResult = SetFilePointerEx(mhFile, li, &li, FILE_CURRENT);
@@ -413,7 +399,7 @@ off_type FileStream::getPosition(PositionType positionType) const
 }
 
 
-bool FileStream::setPosition(off_type position, PositionType positionType)
+bool FileStream::SetPosition(off_type position, PositionType positionType)
 {
     using namespace FileStreamLocal;
 
@@ -450,9 +436,9 @@ bool FileStream::setPosition(off_type position, PositionType positionType)
 }
 
 
-size_type FileStream::getAvailable() const
+size_type FileStream::GetAvailable() const
 {
-    const off_type nPosition = getPosition(kPositionTypeEnd);
+    const off_type nPosition = GetPosition(kPositionTypeEnd);
 
     if(nPosition != kSizeTypeError)
         return (size_type)-nPosition;
@@ -461,19 +447,19 @@ size_type FileStream::getAvailable() const
 }
 
 
-size_type FileStream::read(void* pData, size_type nSize)
+size_type FileStream::Read(void* pData, size_type nSize)
 {
     using namespace FileStreamLocal;
 
     if(mhFile != kFileHandleInvalid)
     {
-        DWORD dwreadCount;
+        DWORD dwReadCount;
 
-        EASTL_ASSERT(nSize < 0xffffffff); // We are currently limited to 4GB per individual read.
-        const BOOL bResult = ReadFile(mhFile, pData, (DWORD)nSize, &dwreadCount, NULL);
+        EA_ASSERT(nSize < 0xffffffff); // We are currently limited to 4GB per individual read.
+        const BOOL bResult = ReadFile(mhFile, pData, (DWORD)nSize, &dwReadCount, NULL);
 
         if(bResult)
-            return (size_type)dwreadCount;
+            return (size_type)dwReadCount;
 
         mnLastError = GetLastError();
     }
@@ -482,7 +468,7 @@ size_type FileStream::read(void* pData, size_type nSize)
 }
 
 
-bool FileStream::write(const void* pData, size_type nSize)
+bool FileStream::Write(const void* pData, size_type nSize)
 {
     using namespace FileStreamLocal;
 
@@ -490,12 +476,12 @@ bool FileStream::write(const void* pData, size_type nSize)
     {
         DWORD dwWriteCount;
 
-        EASTL_ASSERT(nSize < 0xffffffff); // We are currently limited to 4GB per individual read.
+        EA_ASSERT(nSize < 0xffffffff); // We are currently limited to 4GB per individual read.
         const BOOL bResult = WriteFile(mhFile, pData, (DWORD)nSize, &dwWriteCount, NULL);
 
         if(bResult)
         {
-            EASTL_ASSERT(dwWriteCount == nSize);
+            EA_ASSERT(dwWriteCount == nSize);
             return true;
         }
 
@@ -505,7 +491,7 @@ bool FileStream::write(const void* pData, size_type nSize)
 }
 
 
-bool FileStream::flush()
+bool FileStream::Flush()
 {
     using namespace FileStreamLocal;
 
@@ -520,4 +506,23 @@ bool FileStream::flush()
     return bResult;
 }
 
-} // namespace eaio
+
+} // namespace IO
+
+
+} // namespace EA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

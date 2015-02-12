@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,8 +29,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /////////////////////////////////////////////////////////////////////////////
 // EAFileStreamStdC.h
 //
-// Copyright (c) 2003, Electronic Arts Inc. All rights reserved.
-// Created by Paul Pedriana
+// copyright (c) 2003, Electronic Arts Inc. All rights reserved.
+// created by Paul Pedriana
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,113 +38,128 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EAIO_EAFILESTREAM_STDC_H
 #define EAIO_EAFILESTREAM_STDC_H
 
-#include <EAIO/EAFileStream.h>
-#include <EAIO/EAFileBase.h>
-#include <EAIO/PathString.h>
+#include <eaio/EAFileStream.h>
+#include <eaio/EAFileBase.h>
+#include <eaio/PathString.h>
 #include <stddef.h>
 
-namespace eaio
+namespace EA
 {
-     /// IOResultCode
-     /// File stream-specific errors.
-     /// The enumerated set for some platforms is defined in the platform-specific FileStream header and
-     /// directly match the values from the system headers.
-     /// These represent the most common file system errors. However, there are additional errors
-     /// which may be returned by the system APIs which are different from these. You should be
-     /// prepared to receive any value for an error code.
-     enum IOResultCode
-     {
-         kFSErrorBase              =   0, /// Error code base for this module
-         kFSErrorGeneral           =  -1, /// Catchall for all other errors. This matches eaio::kStateError
-         kFSErrorNotOpen           =  -2, /// Attempt to read a stream that hasn't been opened. This matches eaio::kStateNotOpen
-         kFSErrorNoMemory          =  -3, /// Insufficient memory to perform operation
-         kFSErrorInvalidName       =  -4, /// Invalid file name
-         kFSErrorNameTooLong       =  -5, /// File name/path is too long
-         kFSErrorFileNotFound      =  -6, /// Attempt to open a nonexistent file for reading
-         kFSErrorPathNotFound      =  -7, /// Attempt to access a file in a non-existent directory
-         kFSErrorAccessDenied      =  -8, /// Insufficient privileges to open the file
-         kFSErrorWriteProtect      =  -9, /// Attempt to open a read-only file for writing
-         kFSErrorSharingViolation  = -10, /// Attempt to modify a file that is in use
-         kFSErrorDiskFull          = -11, /// Out of space on the device
-         kFSErrorFileAlreadyExists = -12, /// Attempt to create a new file with the same name as existing file
-         kFSErrorDeviceNotready    = -13, /// Attempt to access a hardware device that isn't ready
-         kFSErrorDataCRCError      = -14  /// The data read off of the disk was corrupted in some way
-     };
+    namespace IO
+    {
+        /// IOResultCode
+        /// File stream-specific errors.
+        /// The enumerated set for some platforms is defined in the platform-specific FileStream header and
+        /// directly match the values from the system headers.
+        /// These represent the most common file system errors. However, there are additional errors 
+        /// which may be returned by the system APIs which are different from these. You should be 
+        /// prepared to receive any value for an error code. 
+        enum IOResultCode
+        {
+            kFSErrorBase              =   0, /// Error code base for this module
+            kFSErrorGeneral           =  -1, /// Catchall for all other errors. This matches EA::IO::kStateError
+            kFSErrorNotopen           =  -2, /// Attempt to read a stream that hasn't been opened. This matches EA::IO::kStateNotopen
+            kFSErrorNoMemory          =  -3, /// Insufficient memory to perform operation
+            kFSErrorInvalidName       =  -4, /// Invalid file name
+            kFSErrorNameTooLong       =  -5, /// File name/path is too long
+            kFSErrorFileNotFound      =  -6, /// Attempt to open a nonexistent file for reading
+            kFSErrorPathNotFound      =  -7, /// Attempt to access a file in a non-existent directory
+            kFSErrorAccessDenied      =  -8, /// Insufficient privileges to open the file
+            kFSErrorWriteProtect      =  -9, /// Attempt to open a read-only file for writing
+            kFSErrorSharingViolation  = -10, /// Attempt to modify a file that is in use
+            kFSErrorDiskFull          = -11, /// Out of space on the device
+            kFSErrorFileAlreadyexists = -12, /// Attempt to create a new file with the same name as existing file
+            kFSErrorDeviceNotReady    = -13, /// Attempt to access a hardware device that isn't ready
+            kFSErrorDataCRCError      = -14  /// The data read off of the disk was corrupted in some way
+        };
 
-     class EAIO_API FileStream : public IStream
-     {
-     public:
-         enum { kTypeFileStream = 0x34722300 };
+        class EAIO_API FileStream : public IStream
+        {
+        public:
+            enum { kTypeFileStream = 0x34722300 };
 
-         enum Share
-         {
-             kShareNone   = 0x00,     /// No sharing.
-             kShareread   = 0x01,     /// Allow sharing for reading.
-             kShareWrite  = 0x02,     /// Allow sharing for writing.
-             kShareDelete = 0x04      /// Allow sharing for deletion.
-         };
+            enum Share
+            {
+                kShareNone   = 0x00,     /// No sharing.
+                kShareRead   = 0x01,     /// Allow sharing for reading.
+                kShareWrite  = 0x02,     /// Allow sharing for writing.
+                kShareDelete = 0x04      /// Allow sharing for deletion.
+            };
 
-         enum UsageHints
-         {
-             kUsageHintNone       = 0x00,
-             kUsageHintSequential = 0x01,
-             kUsageHintRandom     = 0x02
-         };
+            enum UsageHints
+            {
+                kUsageHintNone       = 0x00,
+                kUsageHintSequential = 0x01,
+                kUsageHintRandom     = 0x02
+            };
 
-     public:
-         FileStream(const char8_t* pPath8 = NULL);
-         FileStream(const char16_t* pPath16);
+        public:
+            FileStream(const char8_t* pPath8 = NULL);
+            FileStream(const char16_t* pPath16);
 
-         // FileStream
-         // Does not copy information related to an open file, such as the file handle.
-         FileStream(const FileStream& fs);
+            // FileStream
+            // Does not copy information related to an open file, such as the file handle.
+            FileStream(const FileStream& fs);
 
-         virtual ~FileStream();
+            virtual ~FileStream();
 
-         // operator=
-         // Does not copy information related to an open file, such as the file handle.
-         FileStream& operator=(const FileStream& fs);
+            // operator=
+            // Does not copy information related to an open file, such as the file handle.
+            FileStream& operator=(const FileStream& fs);
 
-         virtual int       addRef();
-         virtual int       release();
+            virtual int       AddRef();
+            virtual int       Release();
 
-         virtual void      setPath(const char8_t* pPath8);
-         virtual void      setPath(const char16_t* pPath16);
-         virtual size_t    getPath(char8_t* pPath8, size_t nPathLength);
-         virtual size_t    getPath(char16_t* pPath16, size_t nPathLength);
+            virtual void      setPath(const char8_t* pPath8);
+            virtual void      setPath(const char16_t* pPath16);
+            virtual size_t    getPath(char8_t* pPath8, size_t nPathLength);
+            virtual size_t    getPath(char16_t* pPath16, size_t nPathLength);
 
-         virtual bool      open(int nAccessFlags = kAccessFlagread, int nCreationDisposition = kCDDefault, int nSharing = kShareread, int nUsageHints = kUsageHintNone);
-         virtual bool      close();
-         virtual uint32_t  getType() const { return kTypeFileStream; }
-         virtual int       getAccessFlags() const;
-         virtual int       getState() const;
+            virtual bool      open(int nAccessFlags = kAccessFlagRead, int nCreationDisposition = kCDDefault, int nSharing = kShareRead, int nUsageHints = kUsageHintNone); 
+            virtual bool      close();
+            virtual uint32_t  GetType() const { return kTypeFileStream; }
+            virtual int       GetAccessFlags() const;
+            virtual int       GetState() const;
 
-         virtual size_type getSize() const;
-         virtual bool      setSize(size_type size);
+            virtual size_type getSize() const;
+            virtual bool      SetSize(size_type size);
 
-         virtual off_type  getPosition(PositionType positionType = kPositionTypeBegin) const;
-         virtual bool      setPosition(off_type position, PositionType positionType = kPositionTypeBegin);
+            virtual off_type  GetPosition(PositionType positionType = kPositionTypeBegin) const;
+            virtual bool      SetPosition(off_type position, PositionType positionType = kPositionTypeBegin);
 
-         virtual size_type getAvailable() const;
+            virtual size_type GetAvailable() const;
 
-         virtual size_type read(void* pData, size_type nSize);
-         virtual bool      write(const void* pData, size_type nSize);
-         virtual bool      flush();
+            virtual size_type Read(void* pData, size_type nSize);
+            virtual bool      Write(const void* pData, size_type nSize);
+            virtual bool      Flush();
 
-     protected:
-         typedef eaio::Path::PathString8 PathString8;
+        protected:
+            typedef EA::IO::Path::PathString8 PathString8;
 
-         int         mnFileHandle;
-         PathString8 mPath8;                     /// Path for the file.
-         int         mnRefCount;                 /// Reference count, which may or may not be in use.
-         int         mnAccessFlags;              /// See enum AccessFlags.
-         int         mnCD;                       /// See enum CD (creation disposition).
-         int         mnSharing;                  /// See enum Share.
-         int         mnUsageHints;               /// See enum UsageHints.
-         mutable int mnLastError;                /// Used for error reporting.
+            int         mnFileHandle;
+            PathString8 mPath8;                     /// Path for the file.
+            int         mnRefCount;                 /// Reference count, which may or may not be in use.
+            int         mnAccessFlags;              /// See enum AccessFlags.
+            int         mnCD;                       /// See enum CD (creation disposition).
+            int         mnSharing;                  /// See enum Share.
+            int         mnUsageHints;               /// See enum UsageHints.
+            mutable int mnLastError;                /// Used for error reporting.
 
-     }; // class FileStream
+        }; // class FileStream
 
-} // namespace eaio
+    } // namespace IO
+
+} // namespace EA
 
 #endif  // #ifndef EAIO_EAFILESTREAMS_TDC_H
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,19 +29,22 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 // PathString.cpp
 // 
-// Copyright (c) 2006, Electronic Arts. All Rights Reserved.
+// copyright (c) 2006, Electronic Arts. All Rights Reserved.
 // Written and maintained by Talin and Paul Pedriana.
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#include "EAIO/internal/Config.h"
-#include "EAIO/PathString.h"
-#include "EAIO/FileBase.h"
-#include "EAIO/FnEncode.h"
-#include "eastl/allocator.h"
+#include <eaio/internal/Config.h>
+#include <eaio/PathString.h>
+#include <eaio/EAFileBase.h>
+#include <eaio/FnEncode.h>
+#include <eastl/coreallocator/icoreallocator_interface.h>
+#include EA_ASSERT_HEADER
 
 
-namespace eaio
+namespace EA
+{
+namespace IO
 {
 namespace Path
 {
@@ -49,37 +52,6 @@ namespace Path
 
 namespace
 {
-    inline PathString16::iterator StrEnd(PathString16::iterator it)
-    {
-        while(*it) 
-            ++it;
-        return it;
-    }
-
-    inline PathString8::iterator StrEnd(PathString8::iterator it)
-    {
-        while(*it) 
-            ++it;
-        return it;
-    }
-
-
-    inline PathString16::iterator StrEnd(PathString16::const_iterator it)
-    {
-        PathString16::iterator itEnd = const_cast<PathString16::iterator>(it);
-        while(*itEnd)
-            ++itEnd;
-        return itEnd;
-    }
-
-    inline PathString8::iterator StrEnd(PathString8::const_iterator it)
-    {
-        PathString8::iterator itEnd = const_cast<PathString8::iterator>(it);
-        while(*itEnd) 
-            ++itEnd;
-        return itEnd;
-    }
-
 
     inline bool IsDirectorySeparator(char16_t c)
     {
@@ -139,7 +111,7 @@ namespace
 EAIO_API int compare(PathString16::const_iterator a, PathString16::const_iterator a_end,
                      PathString16::const_iterator b, PathString16::const_iterator b_end)
 {
-    EASTL_ASSERT(a && b);
+    EA_ASSERT(a && b);
 
     if(a_end == kEndAuto16)
         a_end = StrEnd(a);
@@ -173,7 +145,7 @@ EAIO_API int compare(PathString16::const_iterator a, PathString16::const_iterato
 EAIO_API int compare(PathString8::const_iterator a, PathString8::const_iterator a_end,
                      PathString8::const_iterator b, PathString8::const_iterator b_end)
 {
-    EASTL_ASSERT(a && b);
+    EA_ASSERT(a && b);
 
     if(a_end == kEndAuto8)
         a_end = StrEnd(a);
@@ -211,12 +183,12 @@ EAIO_API PathString16::iterator findComponentFwd(
     PathString16::iterator first,
     PathString16::iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto16) 
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     // Skip over initial UNC separators
     if(HasUNCPrefix(first, last))
@@ -246,12 +218,12 @@ EAIO_API PathString8::iterator findComponentFwd(
     PathString8::iterator first,
     PathString8::iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto8) 
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     // Skip over initial UNC separators
     if(HasUNCPrefix(first, last))
@@ -301,12 +273,12 @@ EAIO_API PathString16::iterator findComponentRvs(
     PathString16::iterator first,
     PathString16::iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
 
     if(last == kEndAuto16) 
         last = StrEnd(first);
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     // Skip over any file path separators
     if((last > first) && IsDirectorySeparator(last[-1])) 
@@ -331,12 +303,12 @@ EAIO_API PathString8::iterator findComponentRvs(
     PathString8::iterator first,
     PathString8::iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
 
     if(last == kEndAuto8) 
         last = StrEnd(first);
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     // Skip over any file path separators
     if((last > first) && IsDirectorySeparator(last[-1])) 
@@ -382,12 +354,12 @@ EAIO_API PathString16::iterator getPathComponentStart(
     PathString16::iterator last,
     int32_t nIndex)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto16) 
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     if(nIndex >= 0){
         // Positive index - search forward
@@ -411,12 +383,12 @@ EAIO_API PathString8::iterator getPathComponentStart(
     PathString8::iterator last,
     int32_t nIndex)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto8) 
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     if(nIndex >= 0)
     {
@@ -446,6 +418,9 @@ EAIO_API PathString16::iterator getPathComponentEnd(
     PathString16::iterator last,
     int32_t nIndex)
 {
+    //if(last == kEndAuto16) 
+        last = StrEnd(first);
+
     if(nIndex >= 0){
         // Positive index - search forward
         nIndex++;
@@ -477,6 +452,9 @@ EAIO_API PathString8::iterator getPathComponentEnd(
     PathString8::iterator last,
     int32_t nIndex)
 {
+    if(last == kEndAuto8) 
+        last = StrEnd(first);
+
     if(nIndex >= 0)
     {
         // Positive index - search forward
@@ -513,7 +491,7 @@ EAIO_API PathString16::iterator getFileName(
     PathString16::const_iterator first,
     PathString16::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto16) 
         last = StrEnd(first);
 
@@ -544,7 +522,7 @@ EAIO_API PathString8::iterator getFileName(
     PathString8::const_iterator first,
     PathString8::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto8) 
         last = StrEnd(first);
 
@@ -597,7 +575,7 @@ EAIO_API PathString16::iterator getFileExtension(
     PathString16::const_iterator first,
     PathString16::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto16) 
         last = StrEnd(first);
 
@@ -624,7 +602,7 @@ EAIO_API PathString8::iterator getFileExtension(
     PathString8::const_iterator first,
     PathString8::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto8) 
         last = StrEnd(first);
 
@@ -671,6 +649,9 @@ EAIO_API PathString16::iterator getLocalRoot(
     PathString16::iterator first,
     PathString16::iterator last)
 {
+    if(last == kEndAuto16) 
+        last = StrEnd(first);
+
     if(HasDrivePrefix(first, last))
         return first + 2;
 
@@ -684,6 +665,9 @@ EAIO_API PathString8::iterator getLocalRoot(
     PathString8::iterator first,
     PathString8::iterator last)
 {
+    if(last == kEndAuto8) 
+        last = StrEnd(first);
+
     if(HasDrivePrefix(first, last))
         return first + 2;
 
@@ -718,20 +702,23 @@ EAIO_API PathString16& append(
     PathString16::const_iterator first,
     PathString16::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto16)
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     if(first == last)
         return dst;
 
-    if(!isRelative(first, last))
-        dst.clear();
+    if(isRelative(first, last))
+    {
+        if(!dst.empty()) // It makes little sense to append a '/' char to an empty dst, as an empty dst means there is no dst and the appended directory is all there is.
+            EnsureTrailingSeparator(dst);
+    }
     else
-        ensureTrailingSeparator(dst);
+        dst.clear();
 
     dst.append(first, last);
     return dst;
@@ -742,20 +729,23 @@ EAIO_API PathString8& append(
     PathString8::const_iterator first,
     PathString8::const_iterator last)
 {
-    EASTL_ASSERT(first);
+    EA_ASSERT(first);
     if(last == kEndAuto8)
         last = StrEnd(first);
 
-    EASTL_ASSERT(last);
-    EASTL_ASSERT(first <= last);
+    EA_ASSERT(last);
+    EA_ASSERT(first <= last);
 
     if(first == last)
         return dst;
 
-    if(!isRelative(first, last))
-        dst.clear();
+    if(isRelative(first, last))
+    {
+        if(!dst.empty()) // It makes little sense to append a '/' char to an empty dst, as an empty dst means there is no dst and the appended directory is all there is.
+            EnsureTrailingSeparator(dst);
+    }
     else
-        ensureTrailingSeparator(dst);
+        dst.clear();
 
     dst.append(first, last);
     return dst;
@@ -871,16 +861,18 @@ EAIO_API PathString8& canonicalize(PathString8& path, char8_t separator){
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API PathString16& PathStringNormalize(PathString16& path, bool bCanonicalize){
+EAIO_API PathString16& PathStringnormalize(PathString16& path, bool bcanonicalize)
+{
     PathString16::iterator first = path.begin();
     PathString16::iterator last  = path.end();
     PathString16::iterator out   = first;
 
     bool bHasNonLocalPart = HasUNCPrefix(first, last) || HasDrivePrefix(first, last);
 
-    // Copy initial UNC path
-    while(first < last && *first == '\\'){
-        if(bCanonicalize)
+    // copy initial UNC path
+    while((first < last) && (*first == '\\'))
+    {
+        if(bcanonicalize)
             *out++ = kFilePathSeparator16;
         else
             *out++ = *first;
@@ -889,8 +881,10 @@ EAIO_API PathString16& PathStringNormalize(PathString16& path, bool bCanonicaliz
 
     // Because simplification never increases the size of the path, we can simply
     // write the buffer in-place and adjust the size at the end.
-    while(first < last){
-        if((first + 1 < last) && (first[0] == '.') && IsDirectorySeparator(first[1])){
+    while(first < last)
+    {
+        if((first + 1 < last) && (first[0] == '.') && IsDirectorySeparator(first[1]))
+        {
             first += 2;
 
             // Skip over doubled separator
@@ -904,11 +898,13 @@ EAIO_API PathString16& PathStringNormalize(PathString16& path, bool bCanonicaliz
             && IsDirectorySeparator(first[2])
             && out > path.begin())
         {
-            // Only remove the ".." if there was a trailing directory name to
-            // strip; otherwise, copy the ".." literally (i.e. leave it in the
-            // string.)
+            // strip and that directory isn't a ".."; otherwise, copy the ".." literally 
+            // (i.e. leave it in the string.)
             PathString16::iterator prev = findComponentRvs(path.begin(), out);
-            if(prev > path.begin() || !bHasNonLocalPart){
+
+            if((prev > path.begin() || !bHasNonLocalPart) && 
+                !((prev + 2 < last) && (prev[0] == '.') && (prev[1] == '.') && IsDirectorySeparator(prev[2])))
+            {
                 out = prev;
                 first += 3;
 
@@ -919,12 +915,15 @@ EAIO_API PathString16& PathStringNormalize(PathString16& path, bool bCanonicaliz
             }
         }
 
-        // Copy next component
-        while(first < last){
+        // copy next component
+        while(first < last)
+        {
             char16_t c = *first++;
-            if(IsDirectorySeparator(c)){
+
+            if(IsDirectorySeparator(c))
+            {
                 // Use the canonical separator, not the one in the string
-                if(bCanonicalize)
+                if(bcanonicalize)
                     *out++ = kFilePathSeparator16;
                 else
                     *out++ = c;
@@ -950,16 +949,18 @@ EAIO_API PathString16& PathStringNormalize(PathString16& path, bool bCanonicaliz
     return path;
 }
 
-EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize){
+EAIO_API PathString8& PathStringnormalize(PathString8& path, bool bcanonicalize)
+{
     PathString8::iterator first = path.begin();
     PathString8::iterator last  = path.end();
     PathString8::iterator out   = first;
 
     bool bHasNonLocalPart = HasUNCPrefix(first, last) || HasDrivePrefix(first, last);
 
-    // Copy initial UNC path
-    while(first < last && *first == '\\'){
-        if(bCanonicalize)
+    // copy initial UNC path
+    while((first < last) && (*first == '\\'))
+    {
+        if(bcanonicalize)
             *out++ = kFilePathSeparator8;
         else
             *out++ = *first;
@@ -968,7 +969,8 @@ EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize)
 
     // Because simplification never increases the size of the path, we can simply
     // write the buffer in-place and adjust the size at the end.
-    while(first < last){
+    while(first < last)
+    {
         if((first + 1 < last) && (first[0] == '.') && IsDirectorySeparator(first[1])){
             first += 2;
 
@@ -983,11 +985,13 @@ EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize)
             && IsDirectorySeparator(first[2])
             && out > path.begin())
         {
-            // Only remove the ".." if there was a trailing directory name to
-            // strip; otherwise, copy the ".." literally (i.e. leave it in the
-            // string.)
+            // strip and that directory isn't a ".."; otherwise, copy the ".." literally 
+            // (i.e. leave it in the string.)
             PathString8::iterator prev = findComponentRvs(path.begin(), out);
-            if(prev > path.begin() || !bHasNonLocalPart){
+
+            if((prev > path.begin() || !bHasNonLocalPart) && 
+                !((prev + 2 < last) && (prev[0] == '.') && (prev[1] == '.') && IsDirectorySeparator(prev[2])))
+            {
                 out = prev;
                 first += 3;
 
@@ -998,12 +1002,15 @@ EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize)
             }
         }
 
-        // Copy next component
-        while(first < last){
+        // copy next component
+        while(first < last)
+        {
             char8_t c = *first++;
-            if(IsDirectorySeparator(c)){
+
+            if(IsDirectorySeparator(c))
+            {
                 // Use the canonical separator, not the one in the string
-                if(bCanonicalize)
+                if(bcanonicalize)
                     *out++ = kFilePathSeparator8;
                 else
                     *out++ = c;
@@ -1013,7 +1020,8 @@ EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize)
                     ++first;
                 break;
             } 
-            else if(c == kFilePathDriveSeparator8){
+            else if(c == kFilePathDriveSeparator8)
+            {
                 // Drive separator. Break here if the next char is not a dir sep.
                 *out++ = c;
                 if(first >= last || !IsDirectorySeparator(*out))
@@ -1032,34 +1040,37 @@ EAIO_API PathString8& PathStringNormalize(PathString8& path, bool bCanonicalize)
 
 //////////////////////////////////////////////////////////////////////////
 EAIO_API PathString16& simplify(PathString16& path){
-    return PathStringNormalize(path, false);
+    return PathStringnormalize(path, false);
 }
 
 EAIO_API PathString8& simplify(PathString8& path){
-    return PathStringNormalize(path, false);
+    return PathStringnormalize(path, false);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 EAIO_API PathString16& normalize(PathString16& path){
-    return PathStringNormalize(path, true);
+    return PathStringnormalize(path, true);
 }
 
 EAIO_API PathString8& normalize(PathString8& path){
-    return PathStringNormalize(path, true);
+    return PathStringnormalize(path, true);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 EAIO_API bool isRelative(PathString16::const_iterator first, PathString16::const_iterator last)
 {
-    if(first >= last)
+    if(last == kEndAuto16) 
+        last = StrEnd(first);
+
+    if(first >= last) // If it's empty
         return true;
 
-    if(HasDrivePrefix(first, last))
+    if(HasDrivePrefix(first, last)) // If begins with "C:\"
         return false;
 
-    if((last > first) && IsDirectorySeparator(*first))
+    if((last > first) && IsDirectorySeparator(*first)) // If begins with \ or / (then it is absolute, either as a Unix rooted path or as a Microsoft UNC path)
         return false;
 
     return true;
@@ -1067,13 +1078,16 @@ EAIO_API bool isRelative(PathString16::const_iterator first, PathString16::const
 
 EAIO_API bool isRelative(PathString8::const_iterator first, PathString8::const_iterator last)
 {
-    if(first >= last)
+    if(last == kEndAuto8) 
+        last = StrEnd(first);
+
+    if(first >= last) // If it's empty
         return true;
 
-    if(HasDrivePrefix(first, last))
+    if(HasDrivePrefix(first, last)) // If begins with "C:\"
         return false;
 
-    if((last > first) && IsDirectorySeparator(*first))
+    if((last > first) && IsDirectorySeparator(*first)) // If begins with \ or / (then it is absolute, either as a Unix rooted path or as a Microsoft UNC path)
         return false;
 
     return true;
@@ -1100,9 +1114,10 @@ EAIO_API int compare(const PathString16& a, const PathString16& b)
     PathString16::const_iterator  a_first = a.begin(), a_last;
     PathString16::const_iterator  b_first = b.begin(), b_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
-    while((a_first < a.end()) && (b_first < b.end())){
+    while((a_first < a.end()) && (b_first < b.end()))
+    {
         a_last = findComponentFwd(a_first, a.end());
         b_last = findComponentRvs(b_first, b.end());
 
@@ -1124,9 +1139,10 @@ EAIO_API int compare(const PathString8& a, const PathString8& b)
     PathString8::const_iterator  a_first = a.begin(), a_last;
     PathString8::const_iterator  b_first = b.begin(), b_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
-    while((a_first < a.end()) && (b_first < b.end())){
+    while((a_first < a.end()) && (b_first < b.end()))
+    {
         a_last = findComponentFwd(a_first, a.end());
         b_last = findComponentRvs(b_first, b.end());
 
@@ -1144,7 +1160,7 @@ EAIO_API int compare(const PathString8& a, const PathString8& b)
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API PathString16& computeRelative(
+EAIO_API PathString16& ComputeRelative(
     PathString16& result,
     const PathString16& source,
     const PathString16& target)
@@ -1154,17 +1170,16 @@ EAIO_API PathString16& computeRelative(
     PathString16::const_iterator  source_first = source.begin(), source_last;
     PathString16::const_iterator  target_first = target.begin(), target_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
-    while(source_first < source.end() && target_first < target.end()){
+    while(source_first < source.end() && target_first < target.end())
+    {
         source_last = findComponentFwd(source_first, source.end());
         target_last = findComponentRvs(target_first, target.end());
 
-        int result = compare(
-            source_first, source_last,
-            target_first, target_last);
-
-        if(result)
+        int cResult = compare(source_first, source_last,
+                              target_first, target_last);
+        if(cResult)
             break;
 
         source_first = source_last;
@@ -1196,7 +1211,7 @@ EAIO_API PathString16& computeRelative(
     return join(result, target_first, target.end());
 }
 
-EAIO_API PathString8& computeRelative(
+EAIO_API PathString8& ComputeRelative(
     PathString8& result,
     const PathString8& source,
     const PathString8& target)
@@ -1206,17 +1221,16 @@ EAIO_API PathString8& computeRelative(
     PathString8::const_iterator  source_first = source.begin(), source_last;
     PathString8::const_iterator  target_first = target.begin(), target_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
     while(source_first < source.end() && target_first < target.end()){
         source_last = findComponentFwd(source_first, source.end());
         target_last = findComponentRvs(target_first, target.end());
 
-        int result = compare(
-            source_first, source_last,
-            target_first, target_last);
+        int cResult = compare(source_first, source_last,
+                              target_first, target_last);
 
-        if(result)
+        if(cResult)
             break;
 
         source_first = source_last;
@@ -1250,7 +1264,7 @@ EAIO_API PathString8& computeRelative(
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API bool isSubdirectory(
+EAIO_API bool IsSubdirectory(
     const PathString16& dir,
     const PathString16& sub)
 {
@@ -1259,9 +1273,10 @@ EAIO_API bool isSubdirectory(
     PathString16::const_iterator  dir_first = dir.begin(), dir_last;
     PathString16::const_iterator  sub_first = sub.begin(), sub_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
-    while(dir_first < dir.end() && sub_first < sub.end()){
+    while(dir_first < dir.end() && sub_first < sub.end())
+    {
         dir_last = findComponentFwd(dir_first, dir.end());
         sub_last = findComponentRvs(sub_first, sub.end());
 
@@ -1279,7 +1294,7 @@ EAIO_API bool isSubdirectory(
     return dir_first >= dir.end();
 }
 
-EAIO_API bool isSubdirectory(
+EAIO_API bool IsSubdirectory(
     const PathString8& dir,
     const PathString8& sub)
 {
@@ -1288,9 +1303,10 @@ EAIO_API bool isSubdirectory(
     PathString8::const_iterator  dir_first = dir.begin(), dir_last;
     PathString8::const_iterator  sub_first = sub.begin(), sub_last;
 
-    // Compare each component one at a time, until we find a name that
+    // compare each component one at a time, until we find a name that
     // doesn't match.
-    while(dir_first < dir.end() && sub_first < sub.end()){
+    while(dir_first < dir.end() && sub_first < sub.end())
+    {
         dir_last = findComponentFwd(dir_first, dir.end());
         sub_last = findComponentRvs(sub_first, sub.end());
 
@@ -1311,27 +1327,27 @@ EAIO_API bool isSubdirectory(
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API bool getHasTrailingSeparator(const PathString16& path)
+EAIO_API bool GetHasTrailingSeparator(const PathString16& path)
 {
     return (!path.empty() && IsDirectorySeparator(path.back()));
 }
 
-EAIO_API bool getHasTrailingSeparator(const PathString8& path)
+EAIO_API bool GetHasTrailingSeparator(const PathString8& path)
 {
     return (!path.empty() && IsDirectorySeparator(path.back()));
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API bool getHasTrailingSeparator(PathString16::const_iterator path, size_t nLength)
+EAIO_API bool GetHasTrailingSeparator(PathString16::const_iterator path, size_t nLength)
 {
     if (nLength == kLengthNull)
-        nLength = strlen16(path);
+        nLength = EAIOStrlen16(path);
 
     return ((nLength != 0) && IsDirectorySeparator(*(path + nLength - 1)));
 }
 
-EAIO_API bool getHasTrailingSeparator(PathString8::const_iterator path, size_t nLength)
+EAIO_API bool GetHasTrailingSeparator(PathString8::const_iterator path, size_t nLength)
 {
     if (nLength == kLengthNull)
         nLength = strlen(path);
@@ -1341,29 +1357,32 @@ EAIO_API bool getHasTrailingSeparator(PathString8::const_iterator path, size_t n
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API PathString16& ensureTrailingSeparator(PathString16& path)
+EAIO_API PathString16& EnsureTrailingSeparator(PathString16& path)
 {
-    if(!getHasTrailingSeparator(path))
+    // To consider: should we add to an empty path?
+    if(/*!path.empty() &&*/ !GetHasTrailingSeparator(path))
         path.pushBack(kFilePathSeparator16);
     return path;
 }
 
-EAIO_API PathString8& ensureTrailingSeparator(PathString8& path)
+EAIO_API PathString8& EnsureTrailingSeparator(PathString8& path)
 {
-    if(!getHasTrailingSeparator(path))
+    // To consider: should we add to an empty path?
+    if(/*!path.empty() &&*/ !GetHasTrailingSeparator(path))
         path.pushBack(kFilePathSeparator8);
     return path;
 }
 
-EAIO_API bool ensureTrailingSeparator(char16_t* pDirName, size_t nMaxPermittedLength)
+EAIO_API bool EnsureTrailingSeparator(char16_t* pDirName, size_t nMaxPermittedLength)
 {
-    const size_t n = strlen16(pDirName);
+    // To consider: should we add to an empty path?
+    const size_t n = EAIOStrlen16(pDirName);
 
-    if (!eaio::Path::getHasTrailingSeparator(pDirName, (uint32_t)n))
+    if (!EA::IO::Path::GetHasTrailingSeparator(pDirName, (uint32_t)n))
     {
         if (n + 2 <= nMaxPermittedLength)
         {
-            pDirName[n] = eaio::kFilePathSeparator16;
+            pDirName[n] = EA::IO::kFilePathSeparator16;
             pDirName[n + 1] = 0;
 
             return true;
@@ -1373,15 +1392,16 @@ EAIO_API bool ensureTrailingSeparator(char16_t* pDirName, size_t nMaxPermittedLe
     return false;
 }
 
-EAIO_API bool ensureTrailingSeparator(char8_t* pDirName, size_t nMaxPermittedLength)
+EAIO_API bool EnsureTrailingSeparator(char8_t* pDirName, size_t nMaxPermittedLength)
 {
+    // To consider: should we add to an empty path?
     const size_t n = strlen(pDirName);
 
-    if (!eaio::Path::getHasTrailingSeparator(pDirName, (uint32_t)n))
+    if (!EA::IO::Path::GetHasTrailingSeparator(pDirName, (uint32_t)n))
     {
         if (n + 2 <= nMaxPermittedLength)
         {
-            pDirName[n] = eaio::kFilePathSeparator8;
+            pDirName[n] = EA::IO::kFilePathSeparator8;
             pDirName[n + 1] = 0;
 
             return true;
@@ -1393,21 +1413,21 @@ EAIO_API bool ensureTrailingSeparator(char8_t* pDirName, size_t nMaxPermittedLen
 
 
 //////////////////////////////////////////////////////////////////////////
-EAIO_API PathString16& stripTrailingSeparator(PathString16& path)
+EAIO_API PathString16& StripTrailingSeparator(PathString16& path)
 {
-    if(getHasTrailingSeparator(path))
+    if(GetHasTrailingSeparator(path))
         path.popBack();
     return path;
 }
 
-EAIO_API PathString8& stripTrailingSeparator(PathString8& path)
+EAIO_API PathString8& StripTrailingSeparator(PathString8& path)
 {
-    if(getHasTrailingSeparator(path))
+    if(GetHasTrailingSeparator(path))
         path.popBack();
     return path;
 }
 
-EAIO_API void stripTrailingSeparator(char8_t* pPath, size_t nLength)
+EAIO_API void StripTrailingSeparator(char8_t* pPath, size_t nLength)
 {
     if (nLength == kLengthNull)
         nLength = (uint32_t)strlen(pPath);
@@ -1416,10 +1436,10 @@ EAIO_API void stripTrailingSeparator(char8_t* pPath, size_t nLength)
         pPath[nLength-1] = 0;
 }
 
-EAIO_API void stripTrailingSeparator(char16_t* pPath, size_t nLength)
+EAIO_API void StripTrailingSeparator(char16_t* pPath, size_t nLength)
 {
     if (nLength == kLengthNull)
-        nLength = (uint32_t)strlen16(pPath);
+        nLength = (uint32_t)EAIOStrlen16(pPath);
 
     if (pPath[nLength-1] == EA_FILE_PATH_SEPARATOR_16 || pPath[nLength-1] == EA_FILE_PATH_SEPARATOR_ALT_16)
         pPath[nLength-1] = 0;
@@ -1428,4 +1448,18 @@ EAIO_API void stripTrailingSeparator(char16_t* pPath, size_t nLength)
 
 } // namespace Path
 
-} // namespace eaio
+} // namespace IO
+
+} // namespace EA
+
+
+
+
+
+
+
+
+
+
+
+

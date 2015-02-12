@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,98 +29,114 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /////////////////////////////////////////////////////////////////////////////
 // EAFileStreamUnix.h
 //
-// Copyright (c) 2003, Electronic Arts Inc. All rights reserved.
-// Created by Paul Pedriana
+// copyright (c) 2003, Electronic Arts Inc. All rights reserved.
+// created by Paul Pedriana
 //
 /////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef EAIO_EAFILESTREAM_UNIX_H
 #define EAIO_EAFILESTREAM_UNIX_H
 
-#ifndef EAIO_EAFILESTREAM_H
-    #include <EAIO/EAFileStream.h>
-#endif
-#ifndef EAIO_EAFILEBASE_H
-    #include <EAIO/EAFileBase.h>
-#endif
+
+#include <eaio/EAFileStream.h>
+#include <eaio/EAFileBase.h>
+#include <eaio/PathString.h>
 #include <stddef.h>
 
 
 
-namespace eaio
+namespace EA
 {
-     class EAIO_API FileStream : public IStream
-     {
-     public:
-         enum { kTypeFileStream = 0x34722300 };
+    namespace IO
+    {
+        class EAIO_API FileStream : public IStream
+        {
+        public:
+            enum { kTypeFileStream = 0x34722300 };
 
-         enum Share
-         {
-             kShareNone   = 0x00,     /// No sharing.
-             kShareread   = 0x01,     /// Allow sharing for reading.
-             kShareWrite  = 0x02,     /// Allow sharing for writing.
-             kShareDelete = 0x04      /// Allow sharing for deletion.
-         };
+            enum Share
+            {
+                kShareNone   = 0x00,     /// No sharing.
+                kShareRead   = 0x01,     /// Allow sharing for reading.
+                kShareWrite  = 0x02,     /// Allow sharing for writing.
+                kShareDelete = 0x04      /// Allow sharing for deletion.
+            };
 
-         enum UsageHints
-         {
-             kUsageHintNone       = 0x00,
-             kUsageHintSequential = 0x01,
-             kUsageHintRandom     = 0x02
-         };
+            enum UsageHints
+            {
+                kUsageHintNone       = 0x00,
+                kUsageHintSequential = 0x01,
+                kUsageHintRandom     = 0x02
+            };
 
-     public:
-         FileStream(const char8_t* pPath8 = NULL);
-         FileStream(const char16_t* pPath16);
+        public:
+            FileStream(const char8_t* pPath8 = NULL);
+            FileStream(const char16_t* pPath16);
 
-         // FileStream
-         // Does not copy information related to an open file, such as the file handle.
-         FileStream(const FileStream& fs);
+            // FileStream
+            // Does not copy information related to an open file, such as the file handle.
+            FileStream(const FileStream& fs);
 
-         virtual ~FileStream();
+            virtual ~FileStream();
 
-         // operator=
-         // Does not copy information related to an open file, such as the file handle.
-         FileStream& operator=(const FileStream& fs);
+            // operator=
+            // Does not copy information related to an open file, such as the file handle.
+            FileStream& operator=(const FileStream& fs);
 
-         virtual int       AddRef();
-         virtual int       Release();
+            virtual int       AddRef();
+            virtual int       Release();
 
-         virtual void      SetPath(const char8_t* pPath8);
-         virtual void      SetPath(const char16_t* pPath16);
-         virtual size_t    GetPath(char8_t* pPath8, size_t nPathLength);
-         virtual size_t    GetPath(char16_t* pPath16, size_t nPathLength);
+            virtual void      setPath(const char8_t* pPath8);
+            virtual void      setPath(const char16_t* pPath16);
+            virtual size_t    getPath(char8_t* pPath8, size_t nPathCapacity);
+            virtual size_t    getPath(char16_t* pPath16, size_t nPathCapacity);
 
-         virtual bool      Open(int nAccessFlags = kAccessFlagread, int nCreationDisposition = kCDDefault, int nSharing = kShareread, int nUsageHints = kUsageHintNone);
-         virtual bool      Close();
-         virtual uint32_t  GetType() const { return kTypeFileStream; }
-         virtual int       GetAccessFlags() const;
-         virtual int       GetState() const;
+            virtual bool      open(int nAccessFlags = kAccessFlagRead, int nCreationDisposition = kCDDefault, int nSharing = kShareRead, int nUsageHints = kUsageHintNone); 
+            virtual bool      close();
+            virtual uint32_t  GetType() const { return kTypeFileStream; }
+            virtual int       GetAccessFlags() const;
+            virtual int       GetState() const;
 
-         virtual size_type GetSize() const;
-         virtual bool      SetSize(size_type size);
+            virtual size_type getSize() const;
+            virtual bool      SetSize(size_type size);
 
-         virtual off_type  GetPosition(PositionType positionType = kPositionTypeBegin) const;
-         virtual bool      SetPosition(off_type position, PositionType positionType = kPositionTypeBegin);
+            virtual off_type  GetPosition(PositionType positionType = kPositionTypeBegin) const;
+            virtual bool      SetPosition(off_type position, PositionType positionType = kPositionTypeBegin);
 
-         virtual size_type GetAvailable() const;
+            virtual size_type GetAvailable() const;
 
-         virtual size_type read(void* pData, size_type nSize);
-         virtual bool      Write(const void* pData, size_type nSize);
-         virtual bool      Flush();
+            virtual size_type Read(void* pData, size_type nSize);
+            virtual bool      Write(const void* pData, size_type nSize);
+            virtual bool      Flush();
 
-     protected:
-         int         mnFileHandle;
-         char8_t*    mpPath8;                    /// Path for the file.
-         int         mnRefCount;                 /// Reference count, which may or may not be in use.
-         int         mnAccessFlags;              /// See enum AccessFlags.
-         int         mnCD;                       /// See enum CD (creation disposition).
-         int         mnSharing;                  /// See enum Share.
-         int         mnUsageHints;               /// See enum UsageHints.
-         mutable int mnLastError;                /// Used for error reporting.
+        protected:
+            typedef EA::IO::Path::PathString8 PathString8;
 
-     }; // class FileStream
+            int         mnFileHandle;
+            PathString8 mPath8;                     /// Path for the file.
+            int         mnRefCount;                 /// Reference count, which may or may not be in use.
+            int         mnAccessFlags;              /// See enum AccessFlags.
+            int         mnCD;                       /// See enum CD (creation disposition).
+            int         mnSharing;                  /// See enum Share.
+            int         mnUsageHints;               /// See enum UsageHints.
+            mutable int mnLastError;                /// Used for error reporting.
 
-} // namespace eaio
+        }; // class FileStream
+
+    } // namespace IO
+
+} // namespace EA
 
 #endif  // #ifndef EAIO_EAFILESTREAM_UNIX_H
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2007,2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2007,2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -28,36 +28,56 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ///////////////////////////////////////////////////////////////////////////////
 // Allocator.cpp
-// Created by Paul Pedriana - 2007
+// created by Paul Pedriana - 2007
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#include <EAIO/internal/Config.h>
-#include <EAIO/Allocator.h>
-#include "eastl/allocator.h"
+#include <eaio/internal/Config.h>
+#include <eaio/Allocator.h>
+#include <eastl/coreallocator/icoreallocator_interface.h>
 
 
-namespace eaio
+namespace EA
+{
+namespace IO
 {
 
-eastl::allocator* gpCoreAllocator = NULL;
 
 
-EAIO_API eastl::allocator* getAllocator()
+EA::Allocator::ICoreAllocator* gpCoreAllocator = NULL;
+
+
+EAIO_API Allocator::ICoreAllocator* getAllocator()
 {
     #if EAIO_DEFAULT_ALLOCATOR_ENABLED
         if(!gpCoreAllocator)
-            gpCoreAllocator = eastl::getDefaultAllocator();
+            gpCoreAllocator = EA::Allocator::ICoreAllocator::GetDefaultAllocator();
     #endif
 
     return gpCoreAllocator;
 }
 
 
-EAIO_API void setAllocator(eastl::allocator* pCoreAllocator)
+EAIO_API void setAllocator(Allocator::ICoreAllocator* pCoreAllocator)
 {
     gpCoreAllocator = pCoreAllocator;
 }
 
 
-} // namespace eaio
+
+
+} // namespace IO
+
+} // namespace EA
+
+
+
+
+
+
+
+
+
+
+
+

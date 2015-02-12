@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009, 2012 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,20 +29,21 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /////////////////////////////////////////////////////////////////////////////
 // EAFileStreamStdC.cpp
 //
-// Copyright (c) 2003, Electronic Arts Inc. All rights reserved.
-// Created by Paul Pedriana
+// copyright (c) 2003, Electronic Arts Inc. All rights reserved.
+// created by Paul Pedriana
 //
 /////////////////////////////////////////////////////////////////////////////
 
 
-#include <EAIO/internal/Config.h>
-#include <EAIO/EAFileStream.h>
-#include <EAIO/Allocator.h>
-#include <EAIO/FnEncode.h>
+#include <eaio/internal/Config.h>
+#include <eaio/EAFileStream.h>
+#include <eaio/Allocator.h>
+#include <eaio/FnEncode.h>
+#include EA_ASSERT_HEADER
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
-#if defined(TARGET_PLATFORM_UNIX) || defined(TARGET_PLATFORM_PS3)
+#if defined(CS_UNDEFINED_STRING) || defined(CS_UNDEFINED_STRING) || defined(EA_PLATFORM_KETTLE)
     #include <unistd.h>
 #elif defined(_MSC_VER)
     #include <io.h>
@@ -68,7 +69,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
-namespace eaio
+namespace EA
+{
+
+namespace IO
 {
 
 
@@ -82,9 +86,9 @@ FileStream::FileStream(const char8_t* pPath8)
     mnAccessFlags(0),
     mnCD(0),
     mnSharing(0),
-    mnLastError(kStateNotOpen)
+    mnLastError(kStateNotopen)
 {
-    FileStream::SetPath(pPath8); // Note that in a constructor, the virtual function mechanism is inoperable, so we qualify the function call.
+    FileStream::setPath(pPath8); // Note that in a constructor, the virtual function mechanism is inoperable, so we qualify the function call.
 }
 
 
@@ -95,9 +99,9 @@ FileStream::FileStream(const char16_t* pPath16)
     mnAccessFlags(0),
     mnCD(0),
     mnSharing(0),
-    mnLastError(kStateNotOpen)
+    mnLastError(kStateNotopen)
 {
-    FileStream::SetPath(pPath16);
+    FileStream::setPath(pPath16);
 }
 
 
@@ -110,41 +114,41 @@ FileStream::FileStream(const FileStream& fs)
     mnCD(0),
     mnSharing(0),
     mnUsageHints(fs.mnUsageHints),
-    mnLastError(kStateNotOpen)
+    mnLastError(kStateNotopen)
 {
-    FileStream::SetPath(fs.mPath8.c_str());
+    FileStream::setPath(fs.mPath8.c_str());
 }
 
 
 FileStream::~FileStream()
 {
-    FileStream::Close(); // Note that in a destructor, the virtual function mechanism is inoperable, so we qualify the function call.
+    FileStream::close(); // Note that in a destructor, the virtual function mechanism is inoperable, so we qualify the function call.
 }
 
 
 FileStream& FileStream::operator=(const FileStream& fs)
 {
-    Close();
-    SetPath(fs.mPath8.c_str());
+    close();
+    setPath(fs.mPath8.c_str());
 
     mnFileHandle  = kFileHandleInvalid;
     mnAccessFlags = 0;
     mnCD          = 0;
     mnSharing     = 0;
     mnUsageHints  = fs.mnUsageHints;
-    mnLastError   = kStateNotOpen;
+    mnLastError   = kStateNotopen;
 
     return *this;
 }
 
 
-int FileStream::addRef()
+int FileStream::AddRef()
 {
     return ++mnRefCount;
 }
 
 
-int FileStream::release()
+int FileStream::Release()
 {
     if(mnRefCount > 1)
         return --mnRefCount;
@@ -163,7 +167,7 @@ void FileStream::setPath(const char8_t* pPath8)
 void FileStream::setPath(const char16_t* pPath16)
 {
     if((mnFileHandle == kFileHandleInvalid) && pPath16)
-        convertPathUTF16ToUTF8(mPath8, pPath16);
+        ConvertPathUTF16ToUTF8(mPath8, pPath16);
 }
 
 
@@ -177,7 +181,7 @@ size_t FileStream::getPath(char8_t* pPath8, size_t nPathCapacity)
 size_t FileStream::getPath(char16_t* pPath16, size_t nPathCapacity)
 {
     // Return the required strlen of the destination path.
-    return strlcpyUTF8ToUTF16(pPath16, nPathCapacity, mPath8.c_str(), mPath8.length());
+    return StrlcpyUTF8ToUTF16(pPath16, nPathCapacity, mPath8.c_str(), mPath8.length());
 }
 
 
@@ -185,52 +189,52 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
 {
     if((mnFileHandle == kFileHandleInvalid) && nAccessFlags) // If not already open and if some kind of access is requested...
     {
-        int nOpenFlags(0);
+        int nopenFlags(0);
 
-        if(nAccessFlags == kAccessFlagread)
-            nOpenFlags = O_RDONLY;
+        if(nAccessFlags == kAccessFlagRead)
+            nopenFlags = O_RDONLY;
         else if(nAccessFlags == kAccessFlagWrite)
-            nOpenFlags = O_WRONLY;
-        else if(nAccessFlags == kAccessFlagreadWrite)
-            nOpenFlags = O_RDWR;
+            nopenFlags = O_WRONLY;
+        else if(nAccessFlags == kAccessFlagReadWrite)
+            nopenFlags = O_RDWR;
 
         if(nCreationDisposition == kCDDefault)
         {
             // To consider: A proposal is on the table that specifies that the 
-            // default disposition for write is kCDCreateAlways and the default
-            // disposition for read/write is kCDOpenAlways. However, such a change
+            // default disposition for write is kCDcreateAlways and the default
+            // disposition for read/write is kCDopenAlways. However, such a change
             // may break existing code.
             if(nAccessFlags & kAccessFlagWrite)
-                nCreationDisposition = kCDOpenAlways;
+                nCreationDisposition = kCDopenAlways;
             else
-                nCreationDisposition = kCDOpenExisting;
+                nCreationDisposition = kCDopenExisting;
         }
 
         switch(nCreationDisposition)
         {
-            case kCDCreateNew:
-                nOpenFlags |= O_CREAT;
-                nOpenFlags |= O_EXCL;       // Open only if it doesn't already exist.
+            case kCDcreateNew:
+                nopenFlags |= O_CREAT;
+                nopenFlags |= O_EXCL;       // open only if it doesn't already exist.
                 break;
 
-            case kCDCreateAlways:
-                nOpenFlags |= O_CREAT;      // Always make it like the file was just created.
-                nOpenFlags |= O_TRUNC;
+            case kCDcreateAlways:
+                nopenFlags |= O_CREAT;      // Always make it like the file was just created.
+                nopenFlags |= O_TRUNC;
                 break;
 
-            case kCDOpenExisting:           // Open the file if it exists, else fail.
+            case kCDopenExisting:           // open the file if it exists, else fail.
                 break;                      // Nothing to do.
 
-            case kCDOpenAlways:
-                nOpenFlags |= O_CREAT;      // Open the file no matter what.
+            case kCDopenAlways:
+                nopenFlags |= O_CREAT;      // open the file no matter what.
                 break;
 
-            case kCDTruncateExisting:       // Open the file if it exists, and truncate it if so.
-                nOpenFlags |= O_TRUNC;
+            case kCDTruncateExisting:       // open the file if it exists, and truncate it if so.
+                nopenFlags |= O_TRUNC;
                 break;
         }
 
-        mnFileHandle = open(mPath8.c_str(), nOpenFlags);
+        mnFileHandle = open(mPath8.c_str(), nopenFlags);
 
         if(mnFileHandle == kFileHandleInvalid) // If it failed...
         {
@@ -258,27 +262,27 @@ bool FileStream::close()
 {
     if((mnFileHandle != kFileHandleInvalid))
     {
-        close(mnFileHandle); // This returns -1 upon error. But there's not much to do about it.
+        ::close(mnFileHandle); // This returns -1 upon error. But there's not much to do about it.
 
         mnFileHandle  = kFileHandleInvalid;
         mnAccessFlags = 0;
         mnCD          = 0;
         mnSharing     = 0;
         mnUsageHints  = 0;
-        mnLastError   = kStateNotOpen;
+        mnLastError   = kStateNotopen;
     }
 
     return true;
 }
 
 
-int FileStream::getAccessFlags() const
+int FileStream::GetAccessFlags() const
 {
     return mnAccessFlags;
 }
 
 
-int FileStream::getState() const
+int FileStream::GetState() const
 {
     return mnLastError;
 }
@@ -288,15 +292,15 @@ size_type FileStream::getSize() const
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
-        const off_t nPositionSaved = lseek(mnFileHandle, 0, SEEK_CUR);
+        const off_t nPositionSaved = ::lseek(mnFileHandle, 0, SEEK_CUR);
 
         if(nPositionSaved >= 0)
         {
-            const off_t nSize = lseek(mnFileHandle, 0, SEEK_END);
+            const off_t nSize = ::lseek(mnFileHandle, 0, SEEK_END);
 
             if(nSize >= 0)
             {
-                lseek(mnFileHandle, nPositionSaved, SEEK_SET);
+                ::lseek(mnFileHandle, nPositionSaved, SEEK_SET);
                 return (size_type)nSize;
             }
         }
@@ -308,7 +312,7 @@ size_type FileStream::getSize() const
 }
 
 
-bool FileStream::setSize(size_type size)
+bool FileStream::SetSize(size_type size)
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
@@ -321,7 +325,7 @@ bool FileStream::setSize(size_type size)
             // Solution for this?
             (void)size;
         #else
-            const int result = ftruncate(mnFileHandle, (off_t)size);
+            const int result = ::ftruncate(mnFileHandle, (off_t)size);
             if(result == 0) // If the result is OK...
                 return true;
             mnLastError = errno;
@@ -332,19 +336,19 @@ bool FileStream::setSize(size_type size)
 }
 
 
-off_type FileStream::getPosition(PositionType positionType) const
+off_type FileStream::GetPosition(PositionType positionType) const
 {
     off_type result;
 
     if(positionType == kPositionTypeBegin)
-        result = (off_type)lseek(mnFileHandle, 0, SEEK_CUR);
+        result = (off_type)::lseek(mnFileHandle, 0, SEEK_CUR);
     else if(positionType == kPositionTypeEnd)
     {
-        result = (off_type)lseek(mnFileHandle, 0, SEEK_CUR);
+        result = (off_type)::lseek(mnFileHandle, 0, SEEK_CUR);
 
         if(result != (off_type)-1)
         {
-            const size_type nSize = GetSize();
+            const size_type nSize = getSize();
             if(nSize != kSizeTypeError)
                 result = (off_type)(result - (off_type)nSize);
         }
@@ -355,7 +359,7 @@ off_type FileStream::getPosition(PositionType positionType) const
 }
 
 
-bool FileStream::setPosition(off_type position, PositionType positionType)
+bool FileStream::SetPosition(off_type position, PositionType positionType)
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
@@ -377,7 +381,7 @@ bool FileStream::setPosition(off_type position, PositionType positionType)
                 break;
         }
 
-        const off_t nResult = lseek(mnFileHandle, (off_t)position, nMethod);
+        const off_t nResult = ::lseek(mnFileHandle, (off_t)position, nMethod);
 
         if(nResult != -1)
             return true;
@@ -389,9 +393,9 @@ bool FileStream::setPosition(off_type position, PositionType positionType)
 }
 
 
-size_type FileStream::getAvailable() const
+size_type FileStream::GetAvailable() const
 {
-    const off_type nPosition = getPosition(kPositionTypeEnd);
+    const off_type nPosition = GetPosition(kPositionTypeEnd);
 
     if(nPosition != (off_type)kSizeTypeError)
         return (size_type)-nPosition;
@@ -400,11 +404,11 @@ size_type FileStream::getAvailable() const
 }
 
 
-size_type FileStream::read(void* pData, size_type nSize)
+size_type FileStream::Read(void* pData, size_type nSize)
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
-        const size_type nCount = read(mnFileHandle, pData, (unsigned)nSize);
+        const size_type nCount = ::read(mnFileHandle, pData, (unsigned)nSize);
         if(nCount != kSizeTypeError)
             return nCount;
     }
@@ -412,11 +416,11 @@ size_type FileStream::read(void* pData, size_type nSize)
 }
 
 
-bool FileStream::write(const void* pData, size_type nSize)
+bool FileStream::Write(const void* pData, size_type nSize)
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
-        const size_type nCount = write(mnFileHandle, pData, (unsigned)nSize);
+        const size_type nCount = ::write(mnFileHandle, pData, (unsigned)nSize);
         if(nCount != kSizeTypeError)
             return true;
     }
@@ -424,18 +428,17 @@ bool FileStream::write(const void* pData, size_type nSize)
 }
 
 
-bool FileStream::flush()
+bool FileStream::Flush()
 {
     if(mnFileHandle != kFileHandleInvalid)
     {
-        #if defined(TARGET_PLATFORM_UNIX) || defined(TARGET_PLATFORM_PS3)
-            // Linux: On kernels before 2.4, fsync on big files can be inefficient. 
-            //        An alternative might be to use the O_SYNC flag to open(2).
-            fsync(mnFileHandle);
-        #endif
     }
     return true;
 }
 
 
-} // namespace eaio
+} // namespace IO
+
+
+} // namespace EA
+

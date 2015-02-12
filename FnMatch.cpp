@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,22 +29,25 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 // FnMatch.cpp
 //
-// Copyright (c) 2006, Electronic Arts Inc. All rights reserved.
+// copyright (c) 2006, Electronic Arts Inc. All rights reserved.
 // Maintained by Paul Pedriana.
 //
 // Implements a file path match much like the Unix fnmatch function.
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#include <EAIO/internal/Config.h>
-#include <EAIO/FnMatch.h>
+#include <eaio/internal/Config.h>
+#include <eaio/FnMatch.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <wchar.h>
 
 
-namespace eaio
+namespace EA
+{
+
+namespace IO
 {
 
 namespace // anonymous
@@ -112,7 +115,7 @@ const char8_t* RangeMatch(const char8_t* pPattern, char8_t cSeparator, char8_t t
 ///////////////////////////////////////////////////////////////////////////////
 // FnMatch
 //
-EAIO_API bool fnMatch(const char8_t* EASTL_RESTRICT pPattern, const char8_t* EASTL_RESTRICT pString, int fnMatchFlags)
+EAIO_API bool FnMatch(const char8_t* EA_RESTRICT pPattern, const char8_t* EA_RESTRICT pString, int fnMatchFlags)
 {
     #if defined(EA_FILE_PATH_SEPARATOR_TYPE_WINDOWS)
         if((fnMatchFlags & kFNMUnixPath) == 0)
@@ -187,7 +190,7 @@ EAIO_API bool fnMatch(const char8_t* EASTL_RESTRICT pPattern, const char8_t* EAS
 
                 while((test = *pString) != '\0') 
                 {
-                    if(fnMatch(pPattern, pString, (fnMatchFlags & ~kFNMPeriod)))
+                    if(FnMatch(pPattern, pString, (fnMatchFlags & ~kFNMPeriod)))
                         return true;
 
                     if((test == cSeparator) && (fnMatchFlags & kFNMPathname))
@@ -258,6 +261,18 @@ EAIO_API bool fnMatch(const char8_t* EASTL_RESTRICT pPattern, const char8_t* EAS
 namespace // anonymous
 {
 
+// We make our our Strchr because some platforms don't implement it, some implement
+// it in 32 bit wchar_t only (Linux), and this function is very simple.
+char16_t* Strchr(const char16_t* pString, char16_t c)
+{
+    do {
+        if(*pString == c)
+            return (char16_t*)pString;
+    } while (*pString++);
+
+    return NULL;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // RangeMatch
@@ -320,7 +335,7 @@ const char16_t* RangeMatch(const char16_t* pPattern, char16_t cSeparator, char16
 ///////////////////////////////////////////////////////////////////////////////
 // FnMatch
 //
-EAIO_API bool fnMatch(const char16_t* EASTL_RESTRICT pPattern, const char16_t* EASTL_RESTRICT pString, int fnMatchFlags)
+EAIO_API bool FnMatch(const char16_t* EA_RESTRICT pPattern, const char16_t* EA_RESTRICT pString, int fnMatchFlags)
 {
     #if defined(EA_FILE_PATH_SEPARATOR_TYPE_WINDOWS)
         if((fnMatchFlags & kFNMUnixPath) == 0)
@@ -379,14 +394,14 @@ EAIO_API bool fnMatch(const char16_t* EASTL_RESTRICT pPattern, const char16_t* E
                 if(c == '\0')
                 {
                     if(fnMatchFlags & kFNMPathname)
-                        return (fnMatchFlags & kFNMLeadingDir) || !wcschr(pString, cSeparator) ? true : false;
+                        return (fnMatchFlags & kFNMLeadingDir) || !Strchr(pString, cSeparator) ? true : false;
                     else
                         return true;
                 }
 
                 else if((c == cSeparator) && (fnMatchFlags & kFNMPathname))
                 {
-                    pString = wcschr(pString, cSeparator);
+                    pString = Strchr(pString, cSeparator);
 
                     if(pString == NULL)
                         return false;
@@ -395,7 +410,7 @@ EAIO_API bool fnMatch(const char16_t* EASTL_RESTRICT pPattern, const char16_t* E
 
                 while((test = *pString) != '\0') 
                 {
-                    if(fnMatch(pPattern, pString, (fnMatchFlags & ~kFNMPeriod)))
+                    if(FnMatch(pPattern, pString, (fnMatchFlags & ~kFNMPeriod)))
                         return true;
 
                     if((test == cSeparator) && (fnMatchFlags & kFNMPathname))
@@ -460,4 +475,21 @@ EAIO_API bool fnMatch(const char16_t* EASTL_RESTRICT pPattern, const char16_t* E
 
 } // FnMatch
 
-} // namespace eaio
+
+
+} // namespace IO
+
+} // namespace EA
+
+
+
+
+
+
+
+
+
+
+
+
+

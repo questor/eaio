@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,7 +29,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 // Config.h
 //
-// Copyright (c) 2006 Electronic Arts Inc.
+// copyright (c) 2006 Electronic Arts Inc.
 // Written and maintained by Paul Pedriana.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EAIO_INTERNAL_CONFIG_H
 
 
-#include "eastl/base/base.h"
+#include <eastl/EABase/eabase.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,8 +63,25 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef EAIO_VERSION
-    #define EAIO_VERSION   "2.08.02"
-    #define EAIO_VERSION_N  20802
+    #define EAIO_VERSION   "2.09.01"
+    #define EAIO_VERSION_N  20901
+#endif
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EAIO_INIFILE_ENABLED
+//
+// If defined as 1, then the IniFile class is made available. The reason it is 
+// disabled by default, at least for the time being, is that it conflicts with
+// the existing UTFFoundation identical class. EAIniFile is in fact in the 
+// process of being moved from UTFFoundation to EAIO so that UTFFoundation can
+// be formally deprecated.
+//
+#ifndef EAIO_INIFILE_ENABLED
+    #define EAIO_INIFILE_ENABLED 0
 #endif
 
 
@@ -83,16 +100,16 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //     void* p = pCoreAllocator->Alloc(37, EAIO_ALLOC_PREFIX, 0);
 //
 // Example usage:
-//     gMessageServer.GetMessageQueue().get_allocator().set_name(EAIO_ALLOC_PREFIX "MessageSystem/Queue");
+//     gMessageServer.GetMessageQueue().getAllocator().setName(EAIO_ALLOC_PREFIX "MessageSystem/Queue");
 //
 #ifndef EAIO_ALLOC_PREFIX
-    #define EAIO_ALLOC_PREFIX "EAIO/"
+    #define EAIO_ALLOC_PREFIX "eaio/"
 #endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// UTF_USE_EATRACE    Defined as 0 or 1. Default is 1 but may be overridden by your project file.
-// UTF_USE_EAASSERT   Defined as 0 or 1. Default is 0.
+// UTF_USE_EATRACE    Defined as 0 or 1. Default is 0
+// UTF_USE_EAASSERT   Defined as 0 or 1. Default is 1
 //
 // Defines whether this package uses the EATrace or EAAssert package to do assertions.
 // EAAssert is a basic lightweight package for portable asserting.
@@ -104,7 +121,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #undef  UTF_USE_EAASSERT
     #define UTF_USE_EAASSERT 0
 #elif !defined(UTF_USE_EAASSERT)
-    #define UTF_USE_EAASSERT 0
+    #define UTF_USE_EAASSERT 1
 #endif
 
 #undef UTF_USE_EATRACE
@@ -116,7 +133,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(EA_ASSERT_HEADER)
     #if defined(UTF_USE_EAASSERT) && UTF_USE_EAASSERT
-        #define EA_ASSERT_HEADER <EAAssert/eaassert.h>
+        #define EA_ASSERT_HEADER <eastl/EAAssert/eaassert.h>
     #else
         #define EA_ASSERT_HEADER <EATrace/EATrace.h>
     #endif
@@ -135,16 +152,76 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED
+//
+// Defined as 0 or 1. Default is 1 (for backward compatibility).
+// Enables the implementation of ICoreAllocator::GetDefaultAllocator
+// in DLL builds. If you build EAIO as a standalone DLL then you typically
+// need provide a local implementation of the ICoreAllocator::GetDefaultAllocator 
+// function. However, some user usage patterns are such that they would prefer
+// to disable this implementation, because they link in a way that it causes 
+// problems.
+//
+#ifndef EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED
+    #define EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED 1
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
 // EAIO_DEFAULT_ALLOCATOR_ENABLED
 //
 // Defined as 0 or 1. Default is 1 (for backward compatibility).
 // Enables the use of ICoreAllocator::GetDefaultAllocator.
 // If disabled then the user is required to explicitly specify the 
-// allocator used by EAIO with eaio::setAllocator() or on a class by
-// class basis within EAIO.
+// allocator used by EAIO with EA::IO::setAllocator() or on a class by
+// class basis within EAIO. Note that this option is different from the 
+// EAIO_DEFAULT_ALLOCATOR_IMPL_ENABLED option. This option enables the 
+// calling of GetDefaultAllocator by this package, the former enables the 
+// actual implementation of GetDefaultAllocator within this package.
 //
 #ifndef EAIO_DEFAULT_ALLOCATOR_ENABLED
     #define EAIO_DEFAULT_ALLOCATOR_ENABLED 1
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EAIO_DIRECTORY_ITERATOR_USE_PATHSTRING
+//
+// Defined as 0 or 1. 1 means to use EAIO PathString.
+// This controls whether the DirectoryIterator class in EAFileDirectory.h 
+// uses EAIO PathString or straight EASTL string16. The latter is the old 
+// setting, and the former is the new setting. The problem with the old
+// use of EASTL string16 is that it doesn't use the EAIO memory allocator
+// and instead uses whatever global EASTL allocator is defined.
+//
+#ifndef EAIO_DIRECTORY_ITERATOR_USE_PATHSTRING
+    #define EAIO_DIRECTORY_ITERATOR_USE_PATHSTRING 0  // Defaults to zero until old package versions which depend on it as zero are obsolete.
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EAIO_FILEPATH_ENABLED
+//
+// Defined as 0 or 1. Default is 0.
+// Defines if the old EAFilePath.h/cpp functionality in the compat directory
+// is enabled and available. This #define doesn't enable compiling of that
+// module; the build system has to do that.
+//
+#ifndef EAIO_FILEPATH_ENABLED
+    #define EAIO_FILEPATH_ENABLED 0
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EAIO_BACKWARDS_COMPATIBILITY
+//
+// Defined as 0 or 1. Default is 1 (for backward compatibility).
+// Enables some deprecated features.
+// To do: Set EAIO_BACKWARDS_COMPATIBILITY to default to zero (disabled) 
+// by about Spring of 2009.
+//
+#ifndef EAIO_BACKWARDS_COMPATIBILITY
+    #define EAIO_BACKWARDS_COMPATIBILITY 1
 #endif
 
 
@@ -176,7 +253,21 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // for individual classes and functions or information about how thread safety impacts them.
 //
 #ifndef EAIO_THREAD_SAFETY_ENABLED
+
     #define EAIO_THREAD_SAFETY_ENABLED 0
+#endif
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EAIO_CPP_STREAM_ENABLED
+//
+// Defined as 0 or 1.
+// Some platforms don't support the C++ standard library.
+//
+#ifndef EAIO_CPP_STREAM_ENABLED
+        #define EAIO_CPP_STREAM_ENABLED 1
+
 #endif
 
 
@@ -187,16 +278,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Defined as 0 or 1, with the default being 1 only for platforms that have 
 // no other option (i.e. typically console platforms).
 // Enables file change notification via manual polling instead of via an 
-// automatic (possibly threaded) background operation. polling is the only 
+// automatic (possibly threaded) background operation. Polling is the only 
 // option on some platforms, and for these platforms it doesn't matter what
 // value FCN_POLL_ENABLED is set to.
 //
 #ifndef FCN_POLL_ENABLED
-    #if defined(TARGET_PLATFORM_WINDOWS)
-        #define FCN_POLL_ENABLED 0
-    #else
         #define FCN_POLL_ENABLED 1
-    #endif
 #endif
 
 
@@ -233,3 +320,20 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #endif // Header include guard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -28,7 +28,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ///////////////////////////////////////////////////////////////////////////////
 // EAIOZoneObject.h
-// Copyright (c) 2007, Electronic Arts. All rights reserved.
+// copyright (c) 2007, Electronic Arts. All rights reserved.
 //
 // This file was copied from MemoryMan/EAIOZoneObject.cpp in order to avoid a 
 // dependency on the MemoryMan package.
@@ -47,9 +47,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EAIO_ZONEOBJECT_H
 
 
-#include "eastl/base/base.h"
-#include "EAIO/internal/Config.h"
-#include "eastl/allocator.h"
+#include <eastl/EABase/eabase.h>
+#include <eaio/internal/Config.h>
+#include <eastl/coreallocator/icoreallocator_interface.h>
 #include <new>
 
 
@@ -65,7 +65,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
-namespace eaio
+namespace EA
 {
     namespace Allocator
     {
@@ -120,7 +120,7 @@ namespace eaio
             // of 'this' to be passed to operator delete.
             virtual ~EAIOZoneObject() {}
 
-            /// This version uses eaio::getAllocator() to allocate the object. 
+            /// This version uses EA::IO::getAllocator() to allocate the object. 
             /// Example usage:
             ///    Widget* pWidget = new Widget;
             static void* operator new(size_t n);
@@ -128,13 +128,13 @@ namespace eaio
 
             /// Example usage:
             ///    Widget* pWidget = new(pCoreAllocator) Widget;
-            static void* operator new(size_t n, eastl::allocator* pAllocator);
-            static void  operator delete(void* p, eastl::allocator* pAllocator);
+            static void* operator new(size_t n, ICoreAllocator* pAllocator);
+            static void  operator delete(void* p, ICoreAllocator* pAllocator);
 
             /// Example usage:
             ///    Widget* pWidget = new(pCoreAllocator, "Widget") Widget;
-            static void* operator new(size_t n, eastl::allocator* pAllocator, const char* pName);
-            static void  operator delete(void* p, eastl::allocator* pAllocator, const char* pName);
+            static void* operator new(size_t n, ICoreAllocator* pAllocator, const char* pName);
+            static void  operator delete(void* p, ICoreAllocator* pAllocator, const char* pName);
 
             /// Overloads the operator new signature used by EA_NEW.
             /// Example usage:
@@ -150,12 +150,26 @@ namespace eaio
             /// least 8 byte boundaries as well.
             static const uint32_t kOffset = ZONE_OBJECT_MIN_ALIGN;
 
-            static void* DoInternalAllocate(size_t n, eastl::allocator* pAllocator,
+            static void* DoInternalAllocate(size_t n, ICoreAllocator* pAllocator, 
                 const char* pName, unsigned int flags);
             static void  DoInternalDeallocate(void* p);
         };
     
     }   // namespace Allocator
-}   // namespace eaio
+}   // namespace EA
+
 
 #endif  // Header include guard
+
+
+
+
+
+
+
+
+
+
+
+
+

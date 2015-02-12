@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
+copyright (C) 2009-2010 Electronic Arts, Inc.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,7 +29,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 // FnMatch.h
 //
-// Copyright (c) 2006, Electronic Arts Inc. All rights reserved.
+// copyright (c) 2006, Electronic Arts Inc. All rights reserved.
 // Written by Paul Pedriana.
 //
 // Implements a file path match much like the Unix fnmatch function.
@@ -40,41 +40,54 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define	EAIO_FNMATCH_H
 
 
-#include "eastl/base/base.h"
-#include <EAIO/internal/Config.h>
+#include <eastl/EABase/eabase.h>
+#include <eaio/internal/Config.h>
 
 
-namespace eaio
+namespace EA
 {
-     enum FnMatchFlags
-     {
-         kFNMNone       = 0x00,  /// No flags.
-         kFNMPathname   = 0x01,  /// Wildcard don't can't see past directory separator chars.
-         kFNMNoEscape   = 0x02,  /// Escape sequences (e.g. '\t') are not recognized. Escape sequences are only ever recognized with Unix-style paths and not DOS-style paths that use '\' chars. It's as if this flag is always active when DOS paths are in use.
-         kFNMPeriod     = 0x04,  /// A leading '.' is matched only explicitly and not by * or ?.
-         kFNMLeadingDir = 0x08,  /// Match a leading directory and allow ignoring after it.
-         kFNMPrefixDir  = 0x10,  /// Directory path text that precedes the string can match the pattern.
-         kFNMCaseFold   = 0x20,  /// Act case-insensitively.
-         kFNMDosPath    = 0x40,  /// Force the path to be interpreted as a DOS path (e.g. '\') instead of native path.
-         kFNMUnixPath   = 0x80   /// Force the path to be interpreted as a Unix path (e.g. '/') instead of native path.
-     };
+    namespace IO
+    {
+        enum FnMatchFlags
+        {
+            kFNMNone       = 0x00,  /// No flags.
+            kFNMPathname   = 0x01,  /// Wildcard don't can't see past directory separator chars.
+            kFNMNoEscape   = 0x02,  /// Escape sequences (e.g. '\t') are not recognized. Escape sequences are only ever recognized with Unix-style paths and not DOS-style paths that use '\' chars. It's as if this flag is always active when DOS paths are in use.
+            kFNMPeriod     = 0x04,  /// A leading '.' is matched only explicitly and not by * or ?.
+            kFNMLeadingDir = 0x08,  /// Match a leading directory and allow ignoring after it.
+            kFNMPrefixDir  = 0x10,  /// Directory path text that precedes the string can match the pattern.
+            kFNMCaseFold   = 0x20,  /// Act case-insensitively.
+            kFNMDosPath    = 0x40,  /// Force the path to be interpreted as a DOS path (e.g. '\') instead of native path.
+            kFNMUnixPath   = 0x80   /// Force the path to be interpreted as a Unix path (e.g. '/') instead of native path.
+        };
 
-     /// fnMatch
-     ///
-     /// Supports the following special pattern symbols:
-     ///     ?   -- arbitrary character
-     ///     *   -- arbitrary characters
-     ///     []  -- selection of characters
-     ///
-     /// The kFNMDosPath and kFNMUnixPath flags can be used to override the assumed
-     /// path type, which defaults to the native path type of the current platform.
-     ///
-     /// Example usage:
-     ///     bool result = fnMatch("a/b/c/*.?[ab]", "a/b/c/d.qa", kFNMCaseFold);
-     ///
-     EAIO_API bool fnMatch(const char8_t*  EASTL_RESTRICT pPattern, const char8_t*  EASTL_RESTRICT pString, int fnMatchFlags = 0);
-     EAIO_API bool fnMatch(const char16_t* EASTL_RESTRICT pPattern, const char16_t* EASTL_RESTRICT pString, int fnMatchFlags = 0);
+        /// FnMatch
+        ///
+        /// Supports the following special pattern symbols:
+        ///     ?   -- arbitrary character
+        ///     *   -- arbitrary characters
+        ///     []  -- selection of characters
+        ///
+        /// The kFNMDosPath and kFNMUnixPath flags can be used to override the assumed
+        /// path type, which defaults to the native path type of the current platform.
+        ///
+        /// Example usage:
+        ///     bool result = FnMatch("a/b/c/*.?[ab]", "a/b/c/d.qa", kFNMCaseFold);
+        ///
+        EAIO_API bool FnMatch(const char8_t*  EA_RESTRICT pPattern, const char8_t*  EA_RESTRICT pString, int fnMatchFlags = 0);
+        EAIO_API bool FnMatch(const char16_t* EA_RESTRICT pPattern, const char16_t* EA_RESTRICT pString, int fnMatchFlags = 0);
 
-} // namespace eaio
+    } // namespace IO
+
+} // namespace EA
+
 
 #endif // Header include guard
+
+
+
+
+
+
+
+
