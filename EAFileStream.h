@@ -70,7 +70,7 @@ namespace EA
             {
                 kFSErrorBase              =   0, /// Error code base for this module
                 kFSErrorGeneral           =  -1, /// Catchall for all other errors. This matches EA::IO::kStateError
-                kFSErrorNotopen           =  -2, /// Attempt to read a stream that hasn't been opened. This matches EA::IO::kStateNotopen
+                kFSErrorNotOpen           =  -2, /// Attempt to read a stream that hasn't been opened. This matches EA::IO::kStateNotOpen
                 kFSErrorNoMemory          =  -3, /// Insufficient memory to perform operation
                 kFSErrorInvalidName       =  -4, /// Invalid file name
                 kFSErrorNameTooLong       =  -5, /// File name/path is too long
@@ -80,7 +80,7 @@ namespace EA
                 kFSErrorWriteProtect      =  -9, /// Attempt to open a read-only file for writing
                 kFSErrorSharingViolation  = -10, /// Attempt to modify a file that is in use
                 kFSErrorDiskFull          = -11, /// Out of space on the device
-                kFSErrorFileAlreadyexists = -12, /// Attempt to create a new file with the same name as existing file
+                kFSErrorFileAlreadyExists = -12, /// Attempt to create a new file with the same name as existing file
                 kFSErrorDeviceNotReady    = -13, /// Attempt to access a hardware device that isn't ready
                 kFSErrorDataCRCError      = -14  /// The data read off of the disk was corrupted in some way
             };
@@ -94,8 +94,8 @@ namespace EA
             kFileOperationRead,   /// Includes Read, GetPosition, getSize.
             kFileOperationWrite,  /// Includes Write, SetSize.
             kFileOperationSeek,   /// Includes SetPosition.
-            kFileOperationopen,   /// Includes open.
-            kFileOperationclose   /// Includes close.
+            kFileOperationOpen,   /// Includes open.
+            kFileOperationClose   /// Includes close.
         };
 
 

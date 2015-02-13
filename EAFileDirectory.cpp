@@ -45,6 +45,16 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include EA_ASSERT_HEADER
 
+#if defined(EA_PLATFORM_XENON)
+    #pragma warning(push, 1)
+    #include <comdecl.h>
+    #pragma warning(pop)
+#elif defined(EA_PLATFORM_WINDOWS)
+    #include <windows.h>
+#elif defined (EA_PLATFORM_UNIX) || defined(EA_PLATFORM_PS3)
+    #include <sys/types.h>
+    #include <dirent.h>
+#endif
 
 
 namespace EA
@@ -267,8 +277,341 @@ size_t DirectoryIterator::readRecursive(const char16_t* pBaseDirectory, EntryLis
 ////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
-// entryFindFirst / entryFindNext / entryFindFinish
+// EntryFindFirst / EntryFindNext / EntryFindFinish
 //
+#if defined(EA_PLATFORM_WINDOWS) || \
+    defined(EA_PLATFORM_XENON)
+
+    EAIO_API EntryFindData* entryFindFirst(const char16_t* pDirectoryPath, const char16_t* pFilterPattern, EntryFindData* pEntryFindData)
+    {
+        using namespace Internal;
+
+        const char16_t pAny[] = { '*', 0 };
+        Path::PathString16 pPathSpecification;
+        if(pDirectoryPath)
+            pPathSpecification += pDirectoryPath;
+        Path::Append(pPathSpecification, pFilterPattern ? pFilterPattern : pAny);
+
+        if(!pEntryFindData)
+        {
+            pEntryFindData = Allocate<EntryFindData>(IO::GetAllocator(), EAIO_ALLOC_PREFIX "EAFileDirectory/EntryFindData");
+            pEntryFindData->mbIsAllocated = true;
+        }
+
+        #if defined(EA_PLATFORM_WINDOWS) // If wide character functions are supported...
+            WIN32_FIND_DATAW win32FindDataW;
+            HANDLE hFindFile = FindFirstFileW(pPathSpecification.c_str(), &win32FindDataW);
+
+            if(hFindFile != INVALID_HANDLE_VALUE)
+            {
+                EAIOStrlcpy16(pEntryFindData->mName, win32FindDataW.cFileName, kMaxPathLength);
+
+                pEntryFindData->mbIsDirectory  = (win32FindDataW.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                if(pEntryFindData->mbIsDirectory)
+                    Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+                if(pDirectoryPath)
+                    EAIOStrlcpy16(pEntryFindData->mDirectoryPath, pDirectoryPath, kMaxPathLength);
+                else
+                    pEntryFindData->mDirectoryPath[0] = 0;
+
+                if(pFilterPattern)
+                    EAIOStrlcpy16(pEntryFindData->mEntryFilterPattern, pFilterPattern, kMaxPathLength);
+                else
+                    pEntryFindData->mEntryFilterPattern[0] = 0;
+
+                pEntryFindData->mPlatformHandle = (uintptr_t)hFindFile;
+
+                return pEntryFindData;
+            }
+        #else
+            Path::PathString8 directory8;
+            // Measure how many UTF-8 chars we'll need (EASTL factors-in a hidden + 1 for NULL terminator)
+            size_t nCharsNeeded = StrlcpyUTF16ToUTF8(NULL, 0, pPathSpecification.c_str());
+            directory8.resize(nCharsNeeded);
+            StrlcpyUTF16ToUTF8(&directory8[0], nCharsNeeded + 1, pPathSpecification.c_str());
+            
+            WIN32_FIND_DATAA win32FindDataA;
+            HANDLE hFindFile = FindFirstFileA(directory8.c_str(), &win32FindDataA);
+
+            if(hFindFile != INVALID_HANDLE_VALUE)
+            {
+                StrlcpyUTF8ToUTF16(pEntryFindData->mName, kMaxPathLength, win32FindDataA.cFileName);
+
+                pEntryFindData->mbIsDirectory = (win32FindDataA.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                if(pEntryFindData->mbIsDirectory)
+                    Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+                if(pDirectoryPath)
+                    EAIOStrlcpy16(pEntryFindData->mDirectoryPath, pDirectoryPath, kMaxPathLength);
+                else
+                    pEntryFindData->mDirectoryPath[0] = 0;
+
+                if(pFilterPattern)
+                    EAIOStrlcpy16(pEntryFindData->mEntryFilterPattern, pFilterPattern, kMaxPathLength);
+                else
+                    pEntryFindData->mEntryFilterPattern[0] = 0;
+
+                pEntryFindData->mPlatformHandle = (uintptr_t)hFindFile;
+
+                return pEntryFindData;
+            }
+        #endif
+
+        if (pEntryFindData->mbIsAllocated)
+            Free(EA::IO::GetAllocator(), pEntryFindData);
+
+        return NULL;
+    }
+
+
+    EAIO_API EntryFindData* entryFindNext(EntryFindData* pEntryFindData)
+    {
+        if(pEntryFindData)
+        {
+            HANDLE hFindFile = (HANDLE)pEntryFindData->mPlatformHandle;
+
+            #if defined(EA_PLATFORM_WINDOWS) // If wide character functions are supported...
+                WIN32_FIND_DATAW win32FindDataW;
+
+                if(FindNextFileW(hFindFile, &win32FindDataW))
+                {
+                    EAIOStrlcpy16(pEntryFindData->mName, win32FindDataW.cFileName, kMaxPathLength);
+
+                    pEntryFindData->mbIsDirectory = (win32FindDataW.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                    if(pEntryFindData->mbIsDirectory)
+                        Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+                    return pEntryFindData;
+                }
+            #else
+                WIN32_FIND_DATAA win32FindDataA;
+
+                if(FindNextFileA(hFindFile, &win32FindDataA))
+                {
+                    StrlcpyUTF8ToUTF16(pEntryFindData->mName, kMaxPathLength, win32FindDataA.cFileName);
+
+                    pEntryFindData->mbIsDirectory = (win32FindDataA.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                    if(pEntryFindData->mbIsDirectory)
+                        Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+                    return pEntryFindData;
+                }
+
+                // Problem: Not all platforms always return "./" and "../" directories.
+                // We need to provide those if they aren't present and if they are
+                // appropriate ("../" shouldn't be present for root directories).
+            #endif
+        }
+        return NULL;
+    }
+
+
+    EAIO_API void entryFindFinish(EntryFindData* pEntryFindData)
+    {
+        using namespace Internal;
+
+        if(pEntryFindData)
+        {
+            HANDLE hFindFile = (HANDLE)pEntryFindData->mPlatformHandle;
+
+            if((hFindFile != 0) && (hFindFile != INVALID_HANDLE_VALUE))
+                FindClose(hFindFile);
+
+            if(pEntryFindData->mbIsAllocated)
+                Free(EA::IO::GetAllocator(), pEntryFindData);
+        }
+    }
+
+
+#elif defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_PS3)
+
+    EAIO_API EntryFindData* entryFindFirst(const char16_t* pDirectoryPath, const char16_t* pFilterPattern, EntryFindData* pEntryFindData)
+    {
+        using namespace Internal;
+
+        Path::PathString16 directoryTemp16;
+        Path::PathString8  directory8;
+
+        if(pDirectoryPath)
+            directoryTemp16 += pDirectoryPath;
+
+        // Measure how many UTF-8 chars we'll need (EASTL factors-in a hidden + 1 for NULL terminator)
+        size_t nCharsNeeded = StrlcpyUTF16ToUTF8(NULL, 0, directoryTemp16.c_str());
+        directory8.resize(nCharsNeeded);
+        StrlcpyUTF16ToUTF8(&directory8[0], nCharsNeeded + 1, directoryTemp16.c_str());
+
+        DIR* const dir = opendir(directory8.c_str());
+        if(!dir)
+            return NULL;
+         
+        // Follow windows semantics: don't distinguish between an empty directory and not finding anything.
+        dirent   dirEntryData;
+        dirent*  dirEntry;
+        bool     bPatternMatch = false;
+        char16_t entryName[kMaxPathLength]; // match pEntryFindData->mName
+
+        do { // Run a loop so we can filter out any "." and ".." entries that might be present and entries that don't match the input pattern.
+            #if defined(EA_PLATFORM_UNIX)
+                if((readdir_r(dir, &dirEntryData, &dirEntry) != 0) || !dirEntry)
+                {
+                    closedir(dir);
+                    return NULL; // If no directory entry matches the user-specified pattern, we'll usually be exiting via this line due to (dirEntry == NULL).
+                }
+            #else
+                (void)dirEntryData;
+                dirEntry = readdir(dir);
+
+                if(!dirEntry)
+                {
+                    closedir(dir);
+                    return NULL; // If no directory entry matches the user-specified pattern, we'll usually be exiting via this line due to (dirEntry == NULL).
+                }
+            #endif
+
+            if((strcmp(dirEntry->d_name, ".") == 0) ||
+               (strcmp(dirEntry->d_name, "..") == 0))
+            {
+                bPatternMatch = false;
+            }
+            else
+            {
+                StrlcpyUTF8ToUTF16(entryName, kMaxPathLength, dirEntry->d_name, kLengthNull);
+                bPatternMatch = !pFilterPattern || FnMatch(pFilterPattern, entryName, kFNMNone);
+            }
+        } while(!bPatternMatch);
+
+        if(!pEntryFindData)
+        {
+            pEntryFindData = Allocate<EntryFindData>(IO::getAllocator(), EAIO_ALLOC_PREFIX "EAFileDirectory/EntryFindData");
+            pEntryFindData->mbIsAllocated = true;
+        }
+
+        EAIOStrlcpy16(pEntryFindData->mName, entryName, kMaxPathLength);
+
+        #if defined(__CYGWIN__) // Cygwin chooses to take the most limited view of the Posix standard and doesn't implement d_type.
+            directory8 += dirEntry->d_name;
+            pEntryFindData->mbIsDirectory = Directory::Exists(directory8.c_str());
+        #else
+            pEntryFindData->mbIsDirectory = (dirEntry->d_type == DT_DIR);
+        #endif
+
+        if(pEntryFindData->mbIsDirectory)
+            Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+        EAIOStrlcpy16(pEntryFindData->mDirectoryPath, pDirectoryPath, kMaxPathLength);
+        Path::EnsureTrailingSeparator(pEntryFindData->mDirectoryPath, kMaxPathLength);
+
+        if(pFilterPattern)
+            EAIOStrlcpy16(pEntryFindData->mEntryFilterPattern, pFilterPattern, kMaxPathLength);
+        else
+        {
+            pEntryFindData->mEntryFilterPattern[0] = '*';
+            pEntryFindData->mEntryFilterPattern[1] = 0;
+        }
+
+        pEntryFindData->mPlatformHandle = (uintptr_t) dir;
+         
+        return pEntryFindData;
+    }
+
+
+    EAIO_API EntryFindData* entryFindNext(EntryFindData* pEntryFindData)
+    {
+        if(pEntryFindData)
+        {
+        	// Unix defines DIR as an opaque pointer whose type is undefined. It would be useful to verify that in code here.
+            // EA_COMPILETIME_ASSERT(sizeof(DIR) <= sizeof(pEntryFindData->mPlatformData));
+            DIR* const dir = (DIR*)pEntryFindData->mPlatformHandle;
+              
+            dirent  dirEntryData;
+            dirent* dirEntry;
+
+            #if defined(EA_PLATFORM_UNIX)
+                if(readdir_r(dir, &dirEntryData, &dirEntry) != 0)
+                {
+                    // closedir(dir); // We don't need to do this, as it will be called in EntryFindFinish after we return NULL.
+                    // dir = NULL;
+                    return NULL; // If no directory entry matches the user-specified pattern, we'll usually be exiting via this line due to (dirEntry == NULL).
+                }
+            #else
+                (void)dirEntryData;
+                dirEntry = readdir(dir);
+
+                if(!dirEntry)
+                {
+                    // closedir(dir); // We don't need to do this, as it will be called in EntryFindFinish after we return NULL.
+                    // dir = NULL;
+                    return NULL;
+                }
+            #endif
+
+            char16_t entryName[kMaxPathLength]; // match pEntryFindData->mName
+              
+            while(dirEntry)
+            {     
+                StrlcpyUTF8ToUTF16(entryName, kMaxPathLength, dirEntry->d_name, kLengthNull);
+
+                if((pEntryFindData->mEntryFilterPattern[0] == 0) || 
+                    FnMatch(pEntryFindData->mEntryFilterPattern, entryName, kFNMNone))
+                {
+                    EAIOStrlcpy16(pEntryFindData->mName, entryName, kMaxPathLength);
+
+                    #if defined(__CYGWIN__) // Cygwin chooses to take the most limited view of the Posix standard and doesn't implement d_type.
+                        Path::PathString16 temp16(pEntryFindData->mDirectoryPath);
+                        temp16 += entryName;
+                        pEntryFindData->mbIsDirectory = Directory::Exists(temp16.c_str());
+                    #else
+                        pEntryFindData->mbIsDirectory = (dirEntry->d_type == DT_DIR);
+                    #endif
+
+                    if(pEntryFindData->mbIsDirectory)
+                        Path::EnsureTrailingSeparator(pEntryFindData->mName, kMaxPathLength);
+
+                    return pEntryFindData;
+                }
+                
+                #if defined(EA_PLATFORM_UNIX)
+                    if(readdir_r(dir, &dirEntryData, &dirEntry) != 0)
+                    {
+                        // closedir(dir); // We don't need to do this, as it will be called in EntryFindFinish after we return NULL.
+                        // dir = NULL;
+                        return NULL; // If no directory entry matches the user-specified pattern, we'll usually be exiting via this line due to (dirEntry == NULL).
+                    }
+                #else
+                    (void)dirEntryData;
+                    dirEntry = readdir(dir);
+
+                    if(!dirEntry)
+                    {
+                        // closedir(dir); // We don't need to do this, as it will be called in EntryFindFinish after we return NULL.
+                        // dir = NULL;
+                        return NULL;
+                    }
+                #endif
+            }     
+        }
+         
+        return NULL;
+    }
+
+    EAIO_API void entryFindFinish(EntryFindData* pEntryFindData)
+    {
+        using namespace Internal;
+
+        if(pEntryFindData)
+        {
+            DIR* dir = (DIR*)pEntryFindData->mPlatformHandle;
+
+            if(dir)
+                closedir(dir);
+
+            if(pEntryFindData->mbIsAllocated)
+                Free(EA::IO::getAllocator(), pEntryFindData);
+        }
+    }
+
+#else
 
     // If it doesn't have anything built-in; you need to implement 
     // your own enumeration mechanism, such as by putting a file in each 
@@ -291,6 +634,7 @@ size_t DirectoryIterator::readRecursive(const char16_t* pBaseDirectory, EntryLis
         // To do.
     }
 
+#endif // defined(<platform>)
 
 
 

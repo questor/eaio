@@ -609,7 +609,7 @@ bool IniFile::open(int nAccessFlags)
         }
         else if(mpStream == &mFileStream)
         {
-            const int nCreationMode = (nAccessFlags & IO::kAccessFlagWrite) ? IO::kCDopenAlways      : IO::kCDopenExisting;
+            const int nCreationMode = (nAccessFlags & IO::kAccessFlagWrite) ? IO::kCDOpenAlways      : IO::kCDOpenExisting;
             const int nShareMode    = (nAccessFlags & IO::kAccessFlagWrite) ? FileStream::kShareNone : FileStream::kShareRead;
 
             uint32_t nCurrentTime = 0;

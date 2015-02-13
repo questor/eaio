@@ -450,7 +450,7 @@ namespace EA
                 void     GetChildFileEntrySet(FSEntry* pFSEntry, FSEntrySet& childEntrySet);
                 void     BuildEntry(FSEntry* pEntry, const char16_t* pName, FSEntry* pEntryParent, bool bDirectory);
                 void     GetEntryPath(const FSEntry* pEntry, char16_t* pPath, uint32_t nMaxPermittedLength = kMaxPathLength);
-                bool     Entryexists(const FSEntry* pFSEntry);
+                bool     entryExists(const FSEntry* pFSEntry);
                 void     GetFileTimeAndSize(const FSEntry* pFSEntry, time_t* pTime, size_type* pSize);
                 void     TraceEntryTree(const FSEntry* pEntry, int nCurrentDepth = 0);
                 bool     PollInternal(FSEntry* pFSEntry, int timeoutAbsolute);

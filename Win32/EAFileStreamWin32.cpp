@@ -206,28 +206,28 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
         if(nCreationDisposition == kCDDefault)
         {
             // To consider: A proposal is on the table that specifies that the 
-            // default disposition for write is kCDcreateAlways and the default
-            // disposition for read/write is kCDopenAlways. However, such a change
+            // default disposition for write is kCDCreateAlways and the default
+            // disposition for read/write is kCDOpenAlways. However, such a change
             // may break existing code.
             if(nAccessFlags & kAccessFlagWrite)
-                nCreationDisposition = kCDopenAlways;
+                nCreationDisposition = kCDOpenAlways;
             else
-                nCreationDisposition = kCDopenExisting;
+                nCreationDisposition = kCDOpenExisting;
         }
 
         switch(nCreationDisposition)
         {
             default:
-            case kCDopenExisting:
+            case kCDOpenExisting:
                 ncreate = OPEN_EXISTING;
                 break;
             case kCDcreateNew:
                 ncreate = CREATE_NEW;
                 break;
-            case kCDcreateAlways:
+            case kCDCreateAlways:
                 ncreate = CREATE_ALWAYS;
                 break;
-            case kCDopenAlways:
+            case kCDOpenAlways:
                 ncreate = OPEN_ALWAYS;
                 break;
             case kCDTruncateExisting:
@@ -295,7 +295,7 @@ int FileStream::GetState() const
     using namespace FileStreamLocal;
 
     if(mhFile == kFileHandleInvalid)
-        return kStateNotopen;
+        return kStateNotOpen;
 
     return mnLastError;
 }

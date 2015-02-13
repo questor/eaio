@@ -65,7 +65,7 @@ namespace EA
         {
             kFSErrorBase              =   0,   /// Error code base for this module
             kFSErrorGeneral           =  -1,   /// Catchall for all other errors
-            kFSErrorNotopen           =  -2,   /// Attempt to read a stream that hasn't been opened. We define this as -2 instead of ERROR_INVALID_HANDLE because we already have another define of our own (kStateNotopen) which is -2.
+            kFSErrorNotOpen           =  -2,   /// Attempt to read a stream that hasn't been opened. We define this as -2 instead of ERROR_INVALID_HANDLE because we already have another define of our own (kStateNotOpen) which is -2.
             kFSErrorNoMemory          =   8,   /// Insufficient memory to perform operation (ERROR_NOT_ENOUGH_MEMORY)
             kFSErrorInvalidName       = 123,   /// Invalid file name (ERROR_INVALID_NAME)
             kFSErrorNameTooLong       = 111,   /// File name/path is too long (ERROR_BUFFER_OVERFLOW)
@@ -75,7 +75,7 @@ namespace EA
             kFSErrorWriteProtect      =  19,   /// Attempt to open a read-only file for writing (ERROR_WRITE_PROTECT)
             kFSErrorSharingViolation  =  16,   /// Attempt to modify a file that is in use (ERROR_CURRENT_DIRECTORY)
             kFSErrorDiskFull          = 112,   /// Out of space on the device (ERROR_DISK_FULL)
-            kFSErrorFileAlreadyexists =  80,   /// Attempt to create a new file with the same name as existing file (ERROR_FILE_EXISTS)
+            kFSErrorFileAlreadyExists =  80,   /// Attempt to create a new file with the same name as existing file (ERROR_FILE_EXISTS)
             kFSErrorDeviceNotReady    =  21,   /// Attempt to access a hardware device that isn't ready (ERROR_NOT_READY)
             kFSErrorDataCRCError      =  23,   /// The data read off of the disk was corrupted in some way (ERROR_CRC)
         };

@@ -136,9 +136,9 @@ namespace EA
         enum CD
         {
             kCDcreateNew        = 1,      /// Fails if file already exists.
-            kCDcreateAlways     = 2,      /// Never fails, always opens or creates and truncates to 0.
-            kCDopenExisting     = 3,      /// Fails if file doesn't exist, keeps contents.
-            kCDopenAlways       = 4,      /// Never fails, creates if doesn't exist, keeps contents.
+            kCDCreateAlways     = 2,      /// Never fails, always opens or creates and truncates to 0.
+            kCDOpenExisting     = 3,      /// Fails if file doesn't exist, keeps contents.
+            kCDOpenAlways       = 4,      /// Never fails, creates if doesn't exist, keeps contents.
             kCDTruncateExisting = 5,      /// Fails if file doesn't exist, but truncates to 0 if it does.
             kCDDefault          = 6       /// Default (implementation-specific) disposition
         };
@@ -170,7 +170,7 @@ namespace EA
         {
             kStateSuccess =  0,
             kStateError   = -1,
-            kStateNotopen = -2
+            kStateNotOpen = -2
         };
 
         /// enum Endian

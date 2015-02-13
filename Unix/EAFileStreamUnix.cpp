@@ -68,7 +68,7 @@ FileStream::FileStream(const char8_t* pPath8)
     mnAccessFlags(0),
     mnCD(0),
     mnSharing(0),
-    mnLastError(kStateNotopen)
+    mnLastError(kStateNotOpen)
 {
     FileStream::setPath(pPath8); // Note that in a constructor, the virtual function mechanism is inoperable, so we qualify the function call.
 }
@@ -82,7 +82,7 @@ FileStream::FileStream(const char16_t* pPath16)
     mnAccessFlags(0),
     mnCD(0),
     mnSharing(0),
-    mnLastError(kStateNotopen)
+    mnLastError(kStateNotOpen)
 {
     FileStream::setPath(pPath16);
 }
@@ -97,7 +97,7 @@ FileStream::FileStream(const FileStream& fs)
     mnCD(0),
     mnSharing(0),
     mnUsageHints(fs.mnUsageHints),
-    mnLastError(kStateNotopen)
+    mnLastError(kStateNotOpen)
 {
     FileStream::setPath(fs.mPath8.c_str());
 }
@@ -119,7 +119,7 @@ FileStream& FileStream::operator=(const FileStream& fs)
     mnCD          = 0;
     mnSharing     = 0;
     mnUsageHints  = fs.mnUsageHints;
-    mnLastError   = kStateNotopen;
+    mnLastError   = kStateNotOpen;
 
     return *this;
 }
@@ -172,52 +172,52 @@ bool FileStream::open(int nAccessFlags, int nCreationDisposition, int nSharing, 
 {
     if((mnFileHandle == kFileHandleInvalid) && nAccessFlags) // If not already open and if some kind of access is requested...
     {
-        int nopenFlags(0);
+        int nOpenFlags(0);
 
         if(nAccessFlags == kAccessFlagRead)
-            nopenFlags = O_RDONLY;
+            nOpenFlags = O_RDONLY;
         else if(nAccessFlags == kAccessFlagWrite)
-            nopenFlags = O_WRONLY;
+            nOpenFlags = O_WRONLY;
         else if(nAccessFlags == kAccessFlagReadWrite)
-            nopenFlags = O_RDWR;
+            nOpenFlags = O_RDWR;
 
         if(nCreationDisposition == kCDDefault)
         {
             // To consider: A proposal is on the table that specifies that the 
-            // default disposition for write is kCDcreateAlways and the default
-            // disposition for read/write is kCDopenAlways. However, such a change
+            // default disposition for write is kCDCreateAlways and the default
+            // disposition for read/write is kCDOpenAlways. However, such a change
             // may break existing code.
             if(nAccessFlags & kAccessFlagWrite)
-                nCreationDisposition = kCDopenAlways;
+                nCreationDisposition = kCDOpenAlways;
             else
-                nCreationDisposition = kCDopenExisting;
+                nCreationDisposition = kCDOpenExisting;
         }
 
         switch(nCreationDisposition)
         {
             case kCDcreateNew:
-                nopenFlags |= O_CREAT;
-                nopenFlags |= O_EXCL;       // open only if it doesn't already exist.
+                nOpenFlags |= O_CREAT;
+                nOpenFlags |= O_EXCL;       // open only if it doesn't already exist.
                 break;
 
-            case kCDcreateAlways:
-                nopenFlags |= O_CREAT;      // Always make it like the file was just created.
-                nopenFlags |= O_TRUNC;
+            case kCDCreateAlways:
+                nOpenFlags |= O_CREAT;      // Always make it like the file was just created.
+                nOpenFlags |= O_TRUNC;
                 break;
 
-            case kCDopenExisting:           // open the file if it exists, else fail.
+            case kCDOpenExisting:           // open the file if it exists, else fail.
                 break;                      // Nothing to do.
 
-            case kCDopenAlways:
-                nopenFlags |= O_CREAT;      // open the file no matter what.
+            case kCDOpenAlways:
+                nOpenFlags |= O_CREAT;      // open the file no matter what.
                 break;
 
             case kCDTruncateExisting:       // open the file if it exists, and truncate it if so.
-                nopenFlags |= O_TRUNC;
+                nOpenFlags |= O_TRUNC;
                 break;
         }
 
-        mnFileHandle = ::open(mPath8.c_str(), nopenFlags, 0666);
+        mnFileHandle = ::open(mPath8.c_str(), nOpenFlags, 0666);
 
         if(mnFileHandle == kFileHandleInvalid) // If it failed...
         {
@@ -252,7 +252,7 @@ bool FileStream::close()
         mnCD          = 0;
         mnSharing     = 0;
         mnUsageHints  = 0;
-        mnLastError   = kStateNotopen;
+        mnLastError   = kStateNotOpen;
     }
 
     return true;
