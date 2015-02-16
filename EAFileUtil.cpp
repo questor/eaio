@@ -2719,6 +2719,8 @@ namespace
 // This function does a smart directory create. It doesn't require that the 
 // parent directory exist beforehand as with conventional directory creation
 // API functions.
+// It seems on linux if you create relative paths it doesn't work like it should, for example
+// creating "test/" will not work, but "./test/" WILL work!
 // 
 EAIO_API bool Directory::create(const char16_t* pDirectory)
 {

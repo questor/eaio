@@ -269,6 +269,8 @@ namespace EA
             /// Note that this function and all other functions in the EAFile/EADirectory system requires
             /// a directory path name that ends in a path separator. This is by design as it simplifies
             /// the specification of and manipulation of paths.
+            /// It seems on linux if you create relative paths it doesn't work like it should, for example
+            /// creating "test/" will not work, but "./test/" WILL work!
             EAIO_API bool create(const char16_t* pDirectory);
             EAIO_API bool create(const char8_t* pDirectory);
 
