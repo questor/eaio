@@ -748,7 +748,7 @@ EAIO_API bool File::copy(const char16_t* pPathSource, const char16_t* pPathDesti
 
                             // The Posix standard allows for a write call to write only some of what you ask.
                             for(writeCount = 0; (result >= 0) && (writeCount < readCount); writeCount += result)
-                                result = ::write(nFileHandleDestination, pBuffer, readCount);
+                                result = ::write(nFileHandleDestination, pBuffer+writeCount, readCount-writeCount);
                         }
                         else if(errno == EINTR)
                         {
@@ -814,7 +814,7 @@ EAIO_API bool File::copy(const char8_t* pPathSource, const char8_t* pPathDestina
 
                             // The Posix standard allows for a write call to write only some of what you ask.
                             for(writeCount = 0; (result >= 0) && (writeCount < readCount); writeCount += result)
-                                result = ::write(nFileHandleDestination, pBuffer, readCount);
+                                result = ::write(nFileHandleDestination, pBuffer+writeCount, readCount-writeCount);
                         }
                         else if(errno == EINTR)
                         {
